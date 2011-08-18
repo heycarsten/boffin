@@ -48,10 +48,10 @@ After some data has flowed through your models, you can query them:
 
 ```ruby
 # Get count of unique views
-Listing#hit_count(:views)
+@listing.hit_count(:views)
 
 # Get a raw count of all views ever recorded
-Listing#raw_hit_count(:views)
+@listing.raw_hit_count(:views)
 
 # Get IDs of the most viewed listings in the past 5 days.
 Listing.top_ids(:views, 5)
@@ -68,4 +68,5 @@ Listing.combined_top_ids(5, liked: 2, viewed: 1)
 
  * Hit resolution is set to days, in the future hours, days, months, years will
    all be available.
- * 
+ * Hit counts are unique, but hit tracking is non-unique. In the future you will
+   be able turn unique tracking off if you don't care.
