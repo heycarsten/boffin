@@ -62,10 +62,10 @@ module Boffin
       }
     end
 
-    def object_unique_hit_id_proc
-      @hit_unique_id_proc ||= lambda { |obj|
-        if obj.respond_to?(:boffin_unique_hit_id)
-          obj.boffin_unique_hit_id
+    def object_as_unique_member_proc
+      @object_as_unique_member_proc ||= lambda { |obj|
+        if obj.respond_to?(:as_unique_member)
+          obj.as_unique_member
         else
           "#{Utils.underscore(obj.class)}:#{obj.id}"
         end
