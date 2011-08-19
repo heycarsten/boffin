@@ -5,9 +5,9 @@ module Boffin
       :redis,
       :namespace,
       :disable_unique_tracking,
-      :hour_window_secs,
-      :day_window_secs,
-      :month_window_secs,
+      :hours_window_secs,
+      :days_window_secs,
+      :months_window_secs,
       :cache_expire_secs,
       :object_id_proc,
       :object_as_unique_member_proc
@@ -41,16 +41,16 @@ module Boffin
       @disable_unique_tracking ||= false
     end
 
-    def hour_window_secs
-      @hour_window_secs ||= 24 * 3600 # 1 day
+    def hours_window_secs
+      @hours_window_secs ||= 24 * 3600 # 1 day
     end
 
-    def day_window_secs
-      @day_window_secs ||= 30 * 24 * 3600 # 1 month
+    def days_window_secs
+      @days_window_secs ||= 30 * 24 * 3600 # 1 month
     end
 
-    def month_window_secs
-      @month_window_secs ||= 12 * 30 * 24 * 3600 # 1 year
+    def months_window_secs
+      @months_window_secs ||= 12 * 30 * 24 * 3600 # 1 year
     end
 
     def cache_expire_secs
@@ -69,8 +69,11 @@ module Boffin
 
     def object_as_unique_member_proc
       @object_as_unique_member_proc ||= lambda { |obj|
-        if obj.respond_to?(:as_unique_member)
+        case
+        when obj.respond_to?(:as_unique_member)
           obj.as_unique_member
+        when obj.is_a?(String), obj.is_a?(Symbol), obj.is_a?(Numeric)
+          obj.to_s
         else
           "#{Utils.underscore(obj.class)}:#{obj.id}"
         end

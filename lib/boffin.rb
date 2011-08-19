@@ -8,7 +8,14 @@ require 'boffin/keyspace'
 require 'boffin/tracker'
 
 module Boffin
-  class WithoutUniquenessError < StandardError; end
+  WINDOW_UNIT_FORMATS = {
+    hours:  '%F-%H',
+    days:   '%F',
+    months: '%Y-%m'
+  }
+  WINDOW_UNIT_TYPES = WINDOW_UNIT_FORMATS.keys
+
+  class NoUniquenessError < StandardError; end
 
   def self.config(&block)
     @config ||= Config.new(&block)

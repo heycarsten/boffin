@@ -1,19 +1,30 @@
 require 'bundler/setup'
+
 require 'rspec'
 require 'redis'
+require 'timecop'
+
 require File.expand_path('../../lib/boffin', __FILE__)
 
-$redis = Redis.connect
+$redis     = Redis.connect
+$boffspace = (ENV['BOFFSPACE'] || 'boffin_test')
 
 Boffin.config do |c|
   c.redis     = $redis
-  c.namespace = 'boffin_test'
+  c.namespace = $boffspace
+end
+
+module BoffinSpecHelper
+  module_function
+  def clear_redis_keyspace!
+    if (keys = $redis.keys("#{$boffspace}*")).any?
+      $redis.del(*keys)
+    end
+  end
 end
 
 RSpec.configure do |config|
   config.before(:suite) do
-    if (keys = $redis.keys('boffin_test*')).any?
-      $reds.del(*keys)
-    end
+    BoffinSpecHelper.clear_redis_keyspace!
   end
 end

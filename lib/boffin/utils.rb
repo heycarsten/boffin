@@ -46,5 +46,15 @@ module Boffin
       time - (unit_value * SECONDS_IN_UNIT[unit])
     end
 
+    def time_ago_range(upto, unit)
+      unit, size = *extract_time_unit(unit)
+      ago = time_ago(upto, unit => (size - 1))
+      max, count, times = upto.to_i, ago.to_i, []
+      begin
+        times << Time.at(count)
+      end while (count += SECONDS_IN_UNIT[unit]) <= max
+      times
+    end
+
   end
 end

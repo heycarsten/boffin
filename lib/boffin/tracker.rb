@@ -1,30 +1,27 @@
 module Boffin
   class Tracker
 
-    WINDOWS = [:hour, :day, :month]
-
     attr_reader :config, :ks
 
-    def initialize(config = Config.new)
+    def initialize(config = Boffin.config.dup)
       @config = config
       @ks = Keyspace.new(@config)
     end
 
-    def hit(ns, thing, type, *uniquenesses, opts)
-      opts ||= {}
-      time   = Time.now
-      member = mk_hit_member(uniquenesses, opts[:unique])
+    def hit(ns, thing, type, uniquenesses = [], opts = {})
+      now    = Time.now
+      member = uniquenesses_as_unique_member(uniquenesses, opts[:unique])
       id     = mk_object_id(thing)
       rdb.incr(@ks.object_hit_count_key(ns, id, type))
       if rdb.sadd(@ks.object_hits_key(ns, id, type), member)
-        store_windows(time, ns, thing, id, type, true)
+        store_windows(now, ns, thing, id, type, true)
       else
-        store_windows(time, ns, thing, id, type, false)
+        store_windows(now, ns, thing, id, type, false)
       end
     end
 
-    def uhit(ns, thing, type, *uniquenesses)
-      hit(ns, thing, type, *uniquenesses, unique: true)
+    def uhit(ns, thing, type, uniquenesses = [])
+      hit(ns, thing, type, uniquenesses, unique: true)
     end
 
     def hit_count(ns, thing, type)
@@ -50,9 +47,6 @@ module Boffin
       top("#{ns}.uniq", params)
     end
 
-    # trending :competition, weights: { views: 1, likes: 3 }, days: 3
-    # trending :competition, weights: { views: 1, likes: 3 }, hours: 12
-    # trending :competition, weights: { views: 1, likes: 3 }, months: 6
     def trending(ns, params = {})
       unit, size = Utils.extract_time_unit(params)
       window     = window_range(unit, size)
@@ -72,14 +66,8 @@ module Boffin
     private
 
     def window_keys(ns, type, unit, size)
-      window_range(unit, size).
+      Utils.time_ago_range(Time.now, unit => size).
         map { |t| @ks.hits_time_window_key(ns, type, unit, t) }
-    end
-
-    def window_range(unit, size)
-      now = Time.now
-      ago = Utils.time_ago(now, unit => (size - 1))
-      (ago..now).step(Utils::SECONDS_IN_UNIT[unit])
     end
 
     def fetch_zunion(storekey, keys, opts = {})
@@ -97,11 +85,11 @@ module Boffin
     end
 
     def store_windows(time, ns, thing, id, type, is_unique)
-      WINDOWS.each do |window|
+      WINDOW_UNIT_TYPES.each do |window|
         ukey = @ks.hits_time_window_key("#{ns}.uniq", type, window, time)
         key  = @ks.hits_time_window_key(ns, type, window, time)
         secs = @config.send("#{window}_window_secs")
-        if is_unique && @config.enable_unique_tracking
+        if is_unique && !@config.disable_unique_tracking
           rdb.zincrby(ukey, 1, id)
           rdb.expire(ukey, secs)
         end
@@ -118,11 +106,12 @@ module Boffin
       config.object_id_proc.(obj)
     end
 
-    def mk_hit_member(uniquenesses, ensure_not_nil = false)
+    def uniquenesses_as_unique_member(uniquenesses, ensure_not_nil = false)
       if (obj = uniquenesses.flatten.reject { |u| Utils.blank?(u) }.first)
-        @config.object_unique_hit_id_proc.(obj)
+        @config.object_as_unique_member_proc.(obj)
       elsif ensure_not_nil
-        raise UniquenessError, "Unique criteria were not provided for the incoming hit."
+        raise NoUniquenessError, 'Unique criteria not provided for the ' \
+        'incoming hit.'
       else
         Utils.quick_token
       end

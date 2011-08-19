@@ -61,22 +61,22 @@ describe Boffin::Config do
     end
   end
 
-  describe '#enable_unique_tracking' do
+  describe '#disable_unique_tracking' do
     it 'should be false by default' do
-      Boffin::Config.new.enable_unique_tracking.should be_false
+      Boffin::Config.new.disable_unique_tracking.should be_false
     end
   end
 
-  describe '#hour_window_secs' do
-    specify { subject.hour_window_secs.should == 24 * 3600 } # 1 day
+  describe '#hours_window_secs' do
+    specify { subject.hours_window_secs.should == 24 * 3600 } # 1 day
   end
 
-  describe '#day_window_secs' do
-    specify { subject.day_window_secs.should == 30 * 24 * 3600 } # 1 month
+  describe '#days_window_secs' do
+    specify { subject.days_window_secs.should == 30 * 24 * 3600 } # 1 month
   end
 
-  describe '#month_window_secs' do
-    specify { subject.month_window_secs.should == 12 * 30 * 24 * 3600 } # 1 year
+  describe '#months_window_secs' do
+    specify { subject.months_window_secs.should == 12 * 30 * 24 * 3600 } # 1 year
   end
 
   describe '#cache_expire_secs' do
@@ -98,6 +98,18 @@ describe Boffin::Config do
     it 'calls #as_unique_member of an object that responds to it' do
       obj = Class.new { def as_unique_member; 'obj1'; end }.new
       subject.object_as_unique_member_proc.(obj).should == 'obj1'
+    end
+
+    it 'calls #to_s on String' do
+      subject.object_as_unique_member_proc.('string').should == 'string'
+    end
+
+    it 'calls #to_s on Numeric' do
+      subject.object_as_unique_member_proc.(3.14).should == '3.14'
+    end
+
+    it 'calls #to_s on Symbol' do
+      subject.object_as_unique_member_proc.(:symbol).should == 'symbol'
     end
 
     it 'generates a member for objects that respond to #id' do

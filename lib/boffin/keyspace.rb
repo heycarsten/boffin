@@ -1,13 +1,9 @@
 module Boffin
   class Keyspace
 
-    WINDOW_UNIT_FORMATS = {
-      hour:  '%F-%H',
-      day:   '%F',
-      month: '%Y-%m'
-    }
+    attr_reader :config
 
-    def initialize(config = Config.new)
+    def initialize(config = Boffin.config.dup)
       @config = config
     end
 
