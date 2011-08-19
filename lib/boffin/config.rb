@@ -4,12 +4,13 @@ module Boffin
     attr_writer \
       :redis,
       :namespace,
+      :enable_unique_tracking,
       :hour_window_secs,
       :day_window_secs,
       :month_window_secs,
       :cache_expire_secs,
       :object_id_proc,
-      :object_unique_hit_id
+      :object_as_unique_member_proc
 
     def initialize(&block)
       yield(self) if block_given?
@@ -34,6 +35,10 @@ module Boffin
           "boffin"
         end
       end
+    end
+
+    def enable_unique_tracking
+      @enable_unique_tracking ||= false
     end
 
     def hour_window_secs

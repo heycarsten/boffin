@@ -61,6 +61,12 @@ describe Boffin::Config do
     end
   end
 
+  describe '#enable_unique_tracking' do
+    it 'should be false by default' do
+      Boffin::Config.new.enable_unique_tracking.should be_false
+    end
+  end
+
   describe '#hour_window_secs' do
     specify { subject.hour_window_secs.should == 24 * 3600 } # 1 day
   end
