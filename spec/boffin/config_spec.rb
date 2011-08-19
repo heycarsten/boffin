@@ -61,16 +61,16 @@ describe Boffin::Config do
     end
   end
 
-  describe '#hourly_expire_secs' do
-    specify { subject.hourly_expire_secs.should == 24 * 3600 } # 1 day
+  describe '#hour_window_secs' do
+    specify { subject.hour_window_secs.should == 24 * 3600 } # 1 day
   end
 
-  describe '#daily_expire_secs' do
-    specify { subject.daily_expire_secs.should == 30 * 24 * 3600 } # 1 month
+  describe '#day_window_secs' do
+    specify { subject.day_window_secs.should == 30 * 24 * 3600 } # 1 month
   end
 
-  describe '#monthly_expire_secs' do
-    specify { subject.monthly_expire_secs.should == 12 * 30 * 24 * 3600 } # 1 year
+  describe '#month_window_secs' do
+    specify { subject.month_window_secs.should == 12 * 30 * 24 * 3600 } # 1 year
   end
 
   describe '#cache_expire_secs' do

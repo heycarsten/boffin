@@ -1,23 +1,29 @@
 module Boffin
   class Tracker
+
+    WINDOWS = [:hour, :day, :month]
+
+    attr_reader :config, :ks
+
     def initialize(config = Config.new)
       @config = config
-      @keyspace = Keyspace.new(config)
+      @ks = Keyspace.new(config)
     end
 
     def hit(ns, thing, type, *uniquenesses, opts)
       opts ||= {}
+      time   = Time.now
       member = mk_hit_member(uniquenesses, opts[:unique])
-      daykey = rdb_today_hits_key(type)
-      id     = mk_object_id(object)
-      rdb.incr(rdb_all_hits_raw_count_key(type))
-      rdb.sadd(rdb_all_hits_key(type), member)
-      rdb.zincrby(daykey, 1, id)
-      rdb.expire(daykey, @config.daily_expire_secs)
+      rdb.incr(@ks.object_hit_count_key(ns, id, type))
+      if rdb.sadd(@ks.object_hits_key(ns, id, type), member)
+        store_windows(time, ns, thing, type, true)
+      else
+        store_windows(time, ns, thing, type, false)
+      end
     end
 
-    def uhit(namespace, instance, hitspace, *uniquenesses)
-      hit(namespace, instance, hitspace, *uniquenesses, unique: true)
+    def uhit(ns, thing, type, *uniquenesses)
+      hit(ns, thing, type, *uniquenesses, unique: true)
     end
 
     def unique_hit_count(namespace, hitspace)
@@ -62,12 +68,27 @@ module Boffin
 
     private
 
+    def store_windows(time, ns, thing, type, is_unique)
+      id = mk_object_id(thing)
+      WINDOWS.each do |window|
+        key  = @ks.hits_time_window_key(ns, type, window, time)
+        rkey = @ks.hits_time_window_key("#{ns}.raw", type, window, time)
+        secs = @config.send("#{window}_window_secs")
+        if is_unique
+          rdb.zincrby(key, 1, id)
+          rdb.expire(key, secs)
+        end
+        rdb.zincrby(rkey, 1, id)
+        rdb.expire(rkey, secs)
+      end
+    end
+
     def rdb
-      @config.redis
+      config.redis
     end
 
     def mk_object_id(obj)
-      @config.object_id_proc.(obj)
+      config.object_id_proc.(obj)
     end
 
     def mk_hit_member(uniquenesses, ensure_not_nil = false)

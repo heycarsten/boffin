@@ -37,24 +37,19 @@ describe Boffin::Keyspace do
     end
   end
 
-  describe '#hits_{hour,day,month}_window_key' do
+  describe '#hits_time_window_key' do
     before do
       @time = Time.local(2011, 1, 1, 23)
     end
 
-    it 'generates keys by the hour' do
-      subject.hits_hour_window_key(:profile, :views, @time).
-        should == 'boffin:profile:views:hits.2011-01-01-23'
-    end
-
-    it 'generates keys by the day' do
-      subject.hits_day_window_key(:profile, :views, @time).
-        should == 'boffin:profile:views:hits.2011-01-01'
-    end
-
-    it 'generates keys by the month' do
-      subject.hits_month_window_key(:profile, :views, @time).
-        should == 'boffin:profile:views:hits.2011-01'
+    [:hour, :day, :month].each do |format|
+      describe "given #{format} based window" do
+        specify do
+          strf = Boffin::Keyspace::WINDOW_FORMATS[format]
+          subject.hits_time_window_key(:profile, :views, format, @time).
+            should == "boffin:profile:views:hits.#{@time.strftime(strf)}"
+        end
+      end
     end
   end
 

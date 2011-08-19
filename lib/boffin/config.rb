@@ -4,9 +4,9 @@ module Boffin
     attr_writer \
       :redis,
       :namespace,
-      :hourly_expire_secs,
-      :daily_expire_secs,
-      :monthly_expire_secs,
+      :hour_window_secs,
+      :day_window_secs,
+      :month_window_secs,
       :cache_expire_secs,
       :object_id_proc,
       :object_unique_hit_id
@@ -36,16 +36,16 @@ module Boffin
       end
     end
 
-    def hourly_expire_secs
-      @hourly_expire_secs ||= 24 * 3600 # 1 day
+    def hour_window_secs
+      @hour_window_secs ||= 24 * 3600 # 1 day
     end
 
-    def daily_expire_secs
-      @daily_expire_secs ||= 30 * 24 * 3600 # 1 month
+    def day_window_secs
+      @day_window_secs ||= 30 * 24 * 3600 # 1 month
     end
 
-    def monthly_expire_secs
-      @monthly_expire_secs ||= 12 * 30 * 24 * 3600 # 1 year
+    def month_window_secs
+      @month_window_secs ||= 12 * 30 * 24 * 3600 # 1 year
     end
 
     def cache_expire_secs
