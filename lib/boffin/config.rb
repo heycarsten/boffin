@@ -4,7 +4,7 @@ module Boffin
     attr_writer \
       :redis,
       :namespace,
-      :enable_unique_tracking,
+      :disable_unique_tracking,
       :hour_window_secs,
       :day_window_secs,
       :month_window_secs,
@@ -37,8 +37,8 @@ module Boffin
       end
     end
 
-    def enable_unique_tracking
-      @enable_unique_tracking ||= false
+    def disable_unique_tracking
+      @disable_unique_tracking ||= false
     end
 
     def hour_window_secs

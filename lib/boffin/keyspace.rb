@@ -1,7 +1,7 @@
 module Boffin
   class Keyspace
 
-    WINDOW_FORMATS = {
+    WINDOW_UNIT_FORMATS = {
       hour:  '%F-%H',
       day:   '%F',
       month: '%Y-%m'
@@ -19,21 +19,21 @@ module Boffin
       "#{root(ns)}:#{types.flatten.join('_')}:hits"
     end
 
-    def hits_union_key(ns, types, days)
-      "#{hits_key(ns, types)}:current.#{days}"
+    def hits_union_key(ns, types, unit, size)
+      "#{hits_key(ns, types)}:current.#{unit}_#{size}"
     end
 
-    def combi_hits_union_key(ns, weighted_hit_types, days)
+    def combi_hits_union_key(ns, weighted_hit_types, unit, size)
       types = weighted_hit_types.map { |type, weight| "#{type}_#{weight}" }
-      hits_union_key(ns, types, days)
+      hits_union_key(ns, types, unit, size)
     end
 
     def hits_window_key(ns, types, window)
       "#{hits_key(ns, types)}.#{window}"
     end
 
-    def hits_time_window_key(ns, types, format, time)
-      hits_window_key(ns, types, time.strftime(WINDOW_FORMATS[format]))
+    def hits_time_window_key(ns, types, unit, time)
+      hits_window_key(ns, types, time.strftime(WINDOW_UNIT_FORMATS[unit]))
     end
 
     def object_root(ns, object_id_slug, type)

@@ -32,46 +32,55 @@ module Boffin
       rdb.get(@ks.object_hit_count_key(ns, id, type)).to_i
     end
 
-    def unique_hit_count(ns, thing, type)
+    def uhit_count(ns, thing, type)
       id = mk_object_id(thing)
       rdb.scard(@ks.object_hits_key(ns, id, type)).to_i
     end
 
-    def top(ns, type, days)
-      key = @ks.hits_union_key(ns, type, days)
-      
+    def top(ns, type, params = {})
+      unit, size = Utils.extract_time_unit(params)
+      window     = window_range(unit, size)
+      storkey    = @ks.hits_union_key(ns, type, unit, size)
+      keys       = window_keys(ns, type, unit, size)
+      fetch_zunion(storkey, keys)
     end
 
-    def utop(ns, type, days)
+    def utop(ns, type, params = {})
       warn('utop')
-      top(days, "#{ns}.uniq", type)
+      top("#{ns}.uniq", params)
     end
 
-    def trending(ns, days, weighted_types)
-      
+    # trending :competition, weights: { views: 1, likes: 3 }, days: 3
+    # trending :competition, weights: { views: 1, likes: 3 }, hours: 12
+    # trending :competition, weights: { views: 1, likes: 3 }, months: 6
+    def trending(ns, params = {})
+      unit, size = Utils.extract_time_unit(params)
+      window     = window_range(unit, size)
+      types      = weights.keys
+      weights    = params[:weights]
+      keys       = types.map { |t| window_keys(ns, type, unit, t) }
+      storkey    = @ks.combi_hits_union_key(ns, weights, unit, size)
+      types.each { top(ns, type, params) }
+      fetch_zunion(storkey, keys, weights: weights.values)
     end
 
-    def utrending(ns, days, weighted_types)
+    def utrending(ns, params = {})
       warn('utrending')
-      trending(days, "#{ns}.uniq", weighted_types)
-    end
-
-    def top_ids(type, days = 7)
-      storkey = rdb_stored_hits_union_key(type, days)
-      dates   = (((days-1).days.ago.to_date)..(Date.today)).to_a
-      keys    = dates.map { |date| rdb_hits_date_key(type, date) }
-      rdb_fetch_zunion(storkey, keys)
-    end
-
-    def combined_top_ids(days, weighted_types)
-      types   = weighted_types.keys
-      keys    = types.map { |type| rdb_stored_hits_union_key(type, days) }
-      storkey = rdb_stored_weighted_hits_union_key(weighted_types, days)
-      types.each { |type| top_ids(type, days) }
-      rdb_fetch_zunion(storkey, keys, weights: weighted_types.values)
+      trending("#{ns}.uniq", params)
     end
 
     private
+
+    def window_keys(ns, type, unit, size)
+      window_range(unit, size).
+        map { |t| @ks.hits_time_window_key(ns, type, unit, t) }
+    end
+
+    def window_range(unit, size)
+      now = Time.now
+      ago = Utils.time_ago(now, unit => (size - 1))
+      (ago..now).step(Utils::SECONDS_IN_UNIT[unit])
+    end
 
     def fetch_zunion(storekey, keys, opts = {})
       if rdb.zcard(storekey) == 0 # Not cached, or has expired

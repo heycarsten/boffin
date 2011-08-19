@@ -1,10 +1,11 @@
 require 'base64'
+require 'date'
+require 'time'
 require 'boffin/version'
 require 'boffin/utils'
 require 'boffin/config'
 require 'boffin/keyspace'
 require 'boffin/tracker'
-require 'boffin/reporter'
 
 module Boffin
   class WithoutUniquenessError < StandardError; end
