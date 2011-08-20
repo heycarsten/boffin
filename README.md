@@ -22,7 +22,7 @@ For all configuration stuff check out [lib/boffin/config.rb](https://github.com/
 
 ### Use it on models
 
-Include Boffin's insight into any Ruby class that responds to #id:
+Include Boffin's insight into any Ruby class that responds to `#id`:
 
 ```ruby
 class Listing < My::ORM
@@ -39,8 +39,8 @@ If the object passed in responds to `#as_unique_member` or `#id` it will be used
 as an identifier. If the object is a number, string, or symbol `#to_s` is called
 and the result is used.
 
-You can pass multiple objects and the first one that is not blank (nil, [], {},
-or '') will be used:
+You can pass multiple objects and the first one that is not blank (`nil`, `[]`,
+`{}`, or `''`) will be used:
 
 If no unique value is available Boffin will make one up for you, or will raise
 an error if you are using the strictly unique hit call `#uhit`:
