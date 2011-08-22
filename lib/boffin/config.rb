@@ -9,7 +9,8 @@ module Boffin
       :days_window_secs,
       :months_window_secs,
       :cache_expire_secs,
-      :object_id_proc,
+      :object_as_key_proc,
+      :object_as_member_proc,
       :object_as_unique_member_proc
 
     def initialize(&block)
@@ -57,25 +58,15 @@ module Boffin
       @cache_expire_secs ||= 3600 # 1 hour
     end
 
-    def object_id_proc
-      @object_id_proc ||= lambda { |obj|
-        if obj.respond_to?(:id)
-          obj.id.to_s
-        else
-          Base64.strict_encode64(obj.to_s)
-        end
-      }
-    end
-
-    def object_as_unique_member_proc
-      @object_as_unique_member_proc ||= lambda { |obj|
+    def object_as_member_proc
+      @object_as_member_proc ||= lambda { |obj|
         case
-        when obj.respond_to?(:as_unique_member)
-          obj.as_unique_member
-        when obj.is_a?(String), obj.is_a?(Symbol), obj.is_a?(Numeric)
-          obj.to_s
+        when obj.respond_to?(:id)
+          obj.id.to_s
+        when obj.respond_to?(:as_member)
+          obj.as_member.to_s
         else
-          "#{Utils.underscore(obj.class)}:#{obj.id}"
+          obj.to_s
         end
       }
     end

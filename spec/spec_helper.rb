@@ -3,10 +3,11 @@ require 'bundler/setup'
 require 'rspec'
 require 'redis'
 require 'timecop'
+require 'logger'
 
 require File.expand_path('../../lib/boffin', __FILE__)
 
-$redis     = Redis.connect
+$redis     = Redis.connect(logger: Logger.new(STDERR))
 $boffspace = (ENV['BOFFSPACE'] || 'boffin_test')
 
 Boffin.config do |c|
