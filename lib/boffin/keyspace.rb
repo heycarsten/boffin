@@ -3,56 +3,51 @@ module Boffin
 
     attr_reader :config
 
-    def initialize(namespace, hit_types, config = Boffin.config.dup)
-      @config = config
-      @ns     = namespace
-      @types  = [hit_types].flatten
+    def initialize(tracker, is_uniq = false)
+      @config = tracker.config
+      @ns     = tracker.namespace
+      @uniq   = is_uniq ? true : false
     end
 
-    def root(instance = nil, is_uniq = false)
-      slug = instance ? object_as_key(instance) : nil
+    def root(instance = nil)
+      slug = instance ? Utils.object_as_key(instance) : nil
       "#{@config.namespace}:#{@ns}".tap { |s|
-        s << ".uniq"    if is_uniq
-        s << ".#{slug}" if slug }
+        s << ".#{slug}" if slug
+        s << ".uniq"    if @uniq }
     end
 
-    def hits_key(is_uniq = false)
-      "#{root(nil, is_uniq)}:#{@types.flatten.join('_')}:hits"
+    def hits_root(types, instance = nil)
+      "#{root(instance)}:#{[types].flatten.join('_')}"
     end
 
-    def hits_union_key(unit, size, is_uniq = false)
-      "#{hits_key(is_uniq)}:current.#{unit}_#{size}"
+    def hits(types, instance = nil)
+      "#{hits_root(types, instance)}:hits"
     end
 
-    def combi_hits_union_key(weighted_hit_types, unit, size, is_uniq = false)
+    def hit_count(types, instance)
+      "#{hits_root(types, instance)}:hit_count"
+    end
+
+    def hits_union(types, unit, size)
+      "#{hits(types)}:current.#{unit}_#{size}"
+    end
+
+    def trending_union(weighted_hit_types, unit, size)
       types = weighted_hit_types.map { |type, weight| "#{type}_#{weight}" }
-      hits_union_key(unit, size, is_uniq)
+      hits_union(types, unit, size)
     end
 
-    def hits_window_key(window, is_uniq = false)
-      "#{hits_key(is_uniq)}.#{window}"
+    def hits_window(types, window)
+      "#{hits(types)}.#{window}"
     end
 
-    def hits_time_window_key(unit, time, is_uniq = false)
-      hits_window_key(time.strftime(WINDOW_UNIT_FORMATS[unit]), is_uniq)
+    def hit_time_windows(types, unit, size, starting_at = Time.now)
+      Utils.time_ago_range(starting_at, unit => size).
+        map { |time| hits_time_window(types, unit, time) }
     end
 
-    def object_hits_key(instance, is_uniq = false)
-      "#{root(instance, is_uniq)}.hits"
-    end
-
-    def object_hit_count_key(instance)
-      "#{root(instance, is_uniq)}.hit_count"
-    end
-
-    protected
-
-    def object_as_key(obj)
-      if obj.respond_to?(:id)
-        obj.id.to_s
-      else
-        Base64.strict_encode64(obj.to_s)
-      end
+    def hits_time_window(types, unit, time)
+      hits_window(types, time.strftime(WINDOW_UNIT_FORMATS[unit]))
     end
 
   end

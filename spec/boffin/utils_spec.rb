@@ -1,5 +1,9 @@
 require 'spec_helper'
 
+class MockObject
+  def id; 100; end
+end
+
 describe Boffin::Utils do
   describe '::underscore' do
     it 'works with namespaces' do
@@ -97,4 +101,27 @@ describe Boffin::Utils do
     end
   end
 
+  describe '::uniquenesses_as_session_identifier' do
+    specify { subject.uniquenesses_as_session_identifier([]).size.should > 8 }
+    specify { subject.uniquenesses_as_session_identifier([nil, 'hi']).should == 'hi' }
+    specify { subject.uniquenesses_as_session_identifier([MockObject.new]).should == 'mock_object:100' }
+  end
+
+  describe '::object_as_session_identifier' do
+    specify { subject.object_as_session_identifier(nil).should == '' }
+    specify { subject.object_as_session_identifier(MockObject.new).should == 'mock_object:100' }
+    specify { subject.object_as_session_identifier(3.14).should == '3.14' }
+  end
+
+  describe '::object_as_namespace' do
+    specify { subject.object_as_namespace(:ns).should == 'ns' }
+    specify { subject.object_as_namespace(MockObject).should == 'mock_object' }
+    specify { subject.object_as_namespace('ns').should == 'ns' }
+  end
+
+  describe '::object_as_key(obj)' do
+    specify { subject.object_as_key(MockObject.new).should == '100' }
+    specify { subject.object_as_key(100).should == 'MTAw' }
+    specify { subject.object_as_key('/test?te=st').should == 'L3Rlc3Q/dGU9c3Q=' }
+  end
 end

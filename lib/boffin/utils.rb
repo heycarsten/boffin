@@ -56,5 +56,34 @@ module Boffin
       times
     end
 
+    def uniquenesses_as_session_identifier(aspects)
+      if (obj = aspects.flatten.reject { |u| blank?(u) }.first)
+        object_as_session_identifier(obj)
+      else
+        quick_token
+      end
+    end
+
+    def object_as_session_identifier(obj)
+      obj.respond_to?(:id) ? "#{underscore(obj.class)}:#{obj.id}" : obj.to_s
+    end
+
+    def object_as_namespace(obj)
+      case obj
+      when String, Symbol
+        obj.to_s
+      else
+        underscore(obj)
+      end
+    end
+
+    def object_as_key(obj)
+      if obj.respond_to?(:id)
+        obj.id.to_s
+      else
+        Base64.strict_encode64(obj.to_s)
+      end
+    end
+
   end
 end

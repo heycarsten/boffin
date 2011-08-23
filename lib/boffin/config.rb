@@ -9,9 +9,7 @@ module Boffin
       :days_window_secs,
       :months_window_secs,
       :cache_expire_secs,
-      :object_as_key_proc,
-      :object_as_member_proc,
-      :object_as_unique_member_proc
+      :object_as_member_proc
 
     def initialize(&block)
       yield(self) if block_given?
@@ -30,7 +28,7 @@ module Boffin
 
     def namespace
       @namespace ||= begin
-        if (env = ENV['RACK_ENV'] = ENV['RAILS_ENV'])
+        if (env = ENV['BOFF_ENV'] || ENV['RACK_ENV'] || ENV['RAILS_ENV'])
           "boffin:#{env}"
         else
           "boffin"
@@ -38,24 +36,20 @@ module Boffin
       end
     end
 
-    def disable_unique_tracking
-      @disable_unique_tracking ||= false
-    end
-
     def hours_window_secs
-      @hours_window_secs ||= 24 * 3600 # 1 day
+      @hours_window_secs ||= 3 * 24 * 3600 # 3 days
     end
 
     def days_window_secs
-      @days_window_secs ||= 30 * 24 * 3600 # 1 month
+      @days_window_secs ||= 3 * 30 * 24 * 3600 # 3 months
     end
 
     def months_window_secs
-      @months_window_secs ||= 12 * 30 * 24 * 3600 # 1 year
+      @months_window_secs ||= 3 * 12 * 30 * 24 * 3600 # 3 years
     end
 
     def cache_expire_secs
-      @cache_expire_secs ||= 3600 # 1 hour
+      @cache_expire_secs ||= 1800 # 30 minutes
     end
 
     def object_as_member_proc

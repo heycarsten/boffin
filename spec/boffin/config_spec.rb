@@ -25,15 +25,6 @@ describe Boffin::Config do
         Boffin::Config.new.namespace == 'boffin:staging'
       end
     end
-
-    context 'when Rails is present' do
-      before { ::Rails = Struct.new(:env).new(env: 'development') }
-      after  { Object.send(:remove_const, :Rails) } # :-(
-
-      it 'includes the Rails.env environment into the namespace' do
-        Boffin::Config.new.namespace == 'boffin:development'
-      end
-    end
   end
 
   describe '#new' do
@@ -61,60 +52,37 @@ describe Boffin::Config do
     end
   end
 
-  describe '#disable_unique_tracking' do
-    it 'should be false by default' do
-      Boffin::Config.new.disable_unique_tracking.should be_false
-    end
-  end
-
   describe '#hours_window_secs' do
-    specify { subject.hours_window_secs.should == 24 * 3600 } # 1 day
+    specify { subject.hours_window_secs.should == 3 * 24 * 3600 } # 3 days
   end
 
   describe '#days_window_secs' do
-    specify { subject.days_window_secs.should == 30 * 24 * 3600 } # 1 month
+    specify { subject.days_window_secs.should == 3 * 30 * 24 * 3600 } # 3 months
   end
 
   describe '#months_window_secs' do
-    specify { subject.months_window_secs.should == 12 * 30 * 24 * 3600 } # 1 year
+    specify { subject.months_window_secs.should == 3 * 12 * 30 * 24 * 3600 } # 3 years
   end
 
   describe '#cache_expire_secs' do
-    specify { subject.cache_expire_secs.should == 3600 } # 1 hour
+    specify { subject.cache_expire_secs.should == 1800 } # 30 minute
   end
 
-  describe '#object_id_proc' do
-    it 'calls #to_s on the id of an object that responds to #id' do
-      obj = MockClass.new
-      subject.object_id_proc.(obj).should == '1'
+  describe '#object_as_member_proc' do
+    it 'calls #as_member on the object if available' do
+      obj = Class.new { def as_member; 'obj1'; end }.new
+      subject.object_as_member_proc.(obj).should == 'obj1'
     end
 
-    it 'calls #to_s and base64 encodes the value of an object that does not respond to #id' do
-      subject.object_id_proc.('hello-world').should == 'aGVsbG8td29ybGQ='
-    end
-  end
-
-  describe '#object_as_unique_member_proc' do
-    it 'calls #as_unique_member of an object that responds to it' do
-      obj = Class.new { def as_unique_member; 'obj1'; end }.new
-      subject.object_as_unique_member_proc.(obj).should == 'obj1'
+    it 'calls #id.to_s on the object if available' do
+      obj = Class.new { def id; 100; end }.new
+      subject.object_as_member_proc.(obj).should == '100'
     end
 
-    it 'calls #to_s on String' do
-      subject.object_as_unique_member_proc.('string').should == 'string'
-    end
-
-    it 'calls #to_s on Numeric' do
-      subject.object_as_unique_member_proc.(3.14).should == '3.14'
-    end
-
-    it 'calls #to_s on Symbol' do
-      subject.object_as_unique_member_proc.(:symbol).should == 'symbol'
-    end
-
-    it 'generates a member for objects that respond to #id' do
-      obj = MockClass.new
-      subject.object_as_unique_member_proc.(obj).should == 'mock_class:1'
+    it 'calls #to_s on everything else' do
+      subject.object_as_member_proc.(3.14).should == '3.14'
+      subject.object_as_member_proc.(:symbol).should == 'symbol'
+      subject.object_as_member_proc.('string').should == 'string'
     end
   end
 end
