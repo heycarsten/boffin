@@ -8,7 +8,6 @@ module Boffin
       @tracker  = tracker
       @instance = instance
       @member   = @tracker.object_as_member(@instance)
-      @expsecs  = @tracker.config.send("#{window}_window_secs")
       store
       freeze
     end
@@ -46,7 +45,7 @@ module Boffin
     def set_window_interval(interval, uniq = false)
       key = keyspace(uniq).hits_time_window(@type, interval, @now)
       redis.zincrby(key, 1, @member)
-      redis.expire(key, @expsecs)
+      redis.expire(key, @tracker.config.send("#{interval}_window_secs"))
     end
 
   end

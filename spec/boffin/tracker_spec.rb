@@ -2,85 +2,70 @@ require 'spec_helper'
 
 describe Boffin::Tracker do
   before :all do
-    @tracker = Boffin::Tracker.new
-    @time    = Time.local(2011, 1, 1)
+    @tracker   = Boffin::Tracker.new(MockDitty, [:views, :likes, :shares])
+    @instance1 = MockDitty.new(100)
+    @instance2 = MockDitty.new(101)
+    @instance3 = MockDitty.new(102)
+    @user1     = MockUser.new(1)
+    @user2     = MockUser.new(2)
+    @time      = Time.local(2011, 1, 1)
 
     Timecop.freeze(@time) do
-      @tracker.hit(:urls, '/test',   :views)
-      @tracker.hit(:urls, '/test',   :views, [nil])
-      @tracker.hit(:urls, '/test',   :views, ['sess.2'])
-      @tracker.hit(:urls, '/test',   :views, ['sess.2'])
-      @tracker.hit(:urls, '/test/1', :views, [nil, 'sess.1'])
-      @tracker.hit(:urls, '/test/1', :views, ['sess.1'])
+      @tracker.hit(:views, @instance1)
+      @tracker.hit(:likes, @instance1, [@user1])
+      @tracker.hit(:views, @instance1, [nil, 'sess.1'])
+      @tracker.hit(:views, @instance1, [@user2])
+      @tracker.hit(:views, @instance2, [nil, nil])
+      @tracker.hit(:views, @instance3, [@user1])
+      @tracker.hit(:views, @instance3, ['sess.1'])
+      @tracker.hit(:views, @instance1, ['sess.2'])
+      @tracker.hit(:views, @instance1, [@user1])
+      @tracker.hit(:views, @instance3, [@user2])
     end
   end
 
-  after :all do
-    BoffinSpecHelper.clear_redis_keyspace!
+  describe '#hit(hit_type, instance, uniquenesses = [])' do
+    # Hit.new(self, hit_type, instance, uniquenesses)
   end
 
-  describe '#uhit' do
-    it 'refuses to store hits without any uniqueness' do
-      lambda {
-        @tracker.uhit(:urls, '/test', :views, [nil, nil])
-      }.should raise_error Boffin::NoUniquenessError
-    end
+  describe '#hit_count(hit_type, instance)' do
+    # redis.get(keyspace.hit_count(hit_type, instance))
   end
 
-  describe '#hit' do
-    it 'stores hits without any uniqueness as unique' do
-      @tracker.uhit_count(:urls, '/test', :views).should == 3
-      @tracker.hit_count(:urls, '/test', :views).should == 4
-    end
-
-    it 'does not store hits with the same uniqueness more than once' do
-      @tracker.uhit_count(:urls, '/test/1', :views).should == 1
-      @tracker.hit_count(:urls, '/test/1', :views).should == 2
-    end
-
-    it 'increments members in each time-windowed zset' do
-    end
-
-    it 'increments associated member in time-windowed zset' do
-      @tracker.top(:urls, :views, hours:  1, counts: true).should == [['/test/1', 1]]
-      @tracker.top(:urls, :views, days:   1, counts: true).should == [['/test/1', 1]]
-      @tracker.top(:urls, :views, months: 1, counts: true).should == [['/test/1', 1]]
-    end
-
-    it 'increments associated member in unique time-windowed zsets if unique' do
-      
-    end
+  describe '#uhit_count(hit_type, instance)' do
+    # redis.zcard(keyspace.hits(hit_type, instance)).to_i
   end
 
-  describe '#hit_count' do
-    it 'returns a count of all hits ever made' do
-      @tracker.hit_count(:urls, '/test', :views).should == 4
-    end
-  end
-
-  describe '#uhit_count' do
-    it 'returns a count of all unique hits ever made' do
-      @tracker.uhit_count(:urls, '/test', :views).should == 3
-    end
+  describe '#hit_count_for_session_id(hit_type, instance, sess_obj)' do
+    # sessid = Utils.object_as_session_identifier(sess_obj)
+    # redis.zscore(keyspace.hits(hit_type, instance), sessid).to_i
   end
 
   describe '#top' do
-    before do
+    it 'returns ids ordered by hit counts of weighted totals' do
+      ids = @tracker.top({ views: 10, likes: 30 }, days: 3)
+    end
+
+    it 'returns ids ordered by total counts of a specific hit type' do
+      ids = @tracker.top(:views, days: 3)
+    end
+
+    it 'returns ids in ascending order when passed order: "asc" as an option' do
+      ids = @tracker.top(:views, days: 3, order: 'asc')
     end
   end
-end
 
-describe Boffin::Tracker, '(unique tracking disabled)' do
-  before :all do
-    @tracker = Boffin::Tracker.new
-    @tracker.config.disable_unique_tracking = true
+  describe '#utop' do
+    it 'calculates results based on only unique hit data'
   end
 
-  describe '#top(ns, type, params = {})'
+  describe '#keyspace' do
+    it 'returns a keyspace' do
+      @tracker.keyspace.unique_namespace?.should be_false
+    end
 
-  describe '#utop(ns, type, params = {})'
-
-  describe '#trending(ns, params = {})'
-
-  describe '#utrending(ns, params = {})'
+    it 'returns a unique keyspace when passed true' do
+      @tracker.keyspace(true).unique_namespace?.should be_true
+    end
+  end
 end

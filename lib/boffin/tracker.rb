@@ -1,10 +1,10 @@
 module Boffin
   class Tracker
 
-    attr_reader :config
+    attr_reader :namespace, :hit_types, :config
 
-    def initialize(parent, hit_types = [], config = Boffin.config.dup)
-      @ns        = Utils.object_as_namespace(parent)
+    def initialize(class_or_ns, hit_types = [], config = Boffin.config.dup)
+      @namespace = Utils.object_as_namespace(class_or_ns)
       @hit_types = hit_types
       @config    = config
       @keyspace  = Keyspace.new(self)
@@ -28,31 +28,19 @@ module Boffin
       redis.zscore(keyspace.hits(hit_type, instance), sessid).to_i
     end
 
-    def top(hit_type, opts = {})
+    def top(type_or_weights, opts = {})
       unit, size = *Utils.extract_time_unit(opts)
-      ks         = keyspace(opts[:unique])
-      keys       = keyspace.hit_time_windows(hit_type, unit, size)
-      zfetch(ks.hits_union(hit_type, unit, size), keys, opts)
+      keyspace   = keyspace(opts[:unique])
+      if type_or_weights.is_a?(Hash)
+        multiunion(keyspace, type_or_weights, unit, size, opts)
+      else
+        union(keyspace, type_or_weights, unit, size, opts)
+      end
     end
 
-    def utop(hit_type, opts = {})
+    def utop(type_or_weights, opts = {})
       opts[:unique] = true
-      top(hit_type, opts)
-    end
-
-    def trending(weights, opts = {})
-      unit, size = *Utils.extract_time_unit(params)
-      ks         = keyspace(opts[:unique])
-      keys       = weights.keys.map { |t| ks.hit_time_windows(t, unit, size) }
-      weights.keys.each { |type| top(type, opts) }
-      zfetch(ks.trending_union(weights, unit, size), keys, {
-        weights: weights.values
-      }.merge(opts))
-    end
-
-    def utrending(weights, opts = {})
-      opts[:unique] = true
-      trending(weights, opts)
+      top(type_or_weights, opts)
     end
 
     def object_as_member(obj)
@@ -68,6 +56,19 @@ module Boffin
     end
 
     private
+
+    def union(keyspace, type, unit, size, opts = {})
+      keys = keyspace.hit_time_windows(type, unit, size)
+      zfetch(keyspace.hits_union(type, unit, size), keys, opts)
+      keys
+    end
+
+    def multiunion(keyspace, weights, unit, size, opts = {})
+      keys = weights.keys.map { |type| union(keyspace, type, unit, size, opts) }
+      zfetch(keyspace.hits_union_multi(weights, unit, size), keys, {
+        weights: weights.values
+      }.merge(opts))
+    end
 
     def zfetch(storkey, keys, opts = {})
       zrangeopts = {

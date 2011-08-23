@@ -13,8 +13,7 @@ module Boffin
   WINDOW_UNIT_FORMATS = {
     hours:  '%F-%H',
     days:   '%F',
-    months: '%Y-%m',
-    years:  '%Y'
+    months: '%Y-%m'
   }
   WINDOW_UNIT_TYPES = WINDOW_UNIT_FORMATS.keys
 

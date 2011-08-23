@@ -9,6 +9,10 @@ module Boffin
       @uniq   = is_uniq ? true : false
     end
 
+    def unique_namespace?
+      @uniq
+    end
+
     def root(instance = nil)
       slug = instance ? Utils.object_as_key(instance) : nil
       "#{@config.namespace}:#{@ns}".tap { |s|
@@ -32,7 +36,7 @@ module Boffin
       "#{hits(types)}:current.#{unit}_#{size}"
     end
 
-    def trending_union(weighted_hit_types, unit, size)
+    def hits_union_multi(weighted_hit_types, unit, size)
       types = weighted_hit_types.map { |type, weight| "#{type}_#{weight}" }
       hits_union(types, unit, size)
     end
