@@ -4,22 +4,16 @@ describe Boffin::Config do
   describe '#namespace' do
     specify { subject.namespace.should == 'boffin' }
 
-    context 'when RAILS_ENV is present' do
-      before { ENV['RAILS_ENV'] = 'production' }
-      after  { ENV['RAILS_ENV'] = nil }
-
-      it 'includes the Rails environment into the namespace' do
-        Boffin::Config.new.namespace == 'boffin:production'
-      end
+    it 'includes the Rails environment when available' do
+      ENV['RAILS_ENV'] = 'production'
+      Boffin::Config.new.namespace.should == 'boffin:production'
+      ENV['RAILS_ENV'] = nil
     end
 
-    context 'when RACK_ENV is present' do
-      before { ENV['RACK_ENV'] = 'staging' }
-      after  { ENV['RACK_ENV'] = nil }
-
-      it 'includes the Rack environment into the namespace' do
-        Boffin::Config.new.namespace == 'boffin:staging'
-      end
+    it 'includes the Rack environment when available' do
+      ENV['RACK_ENV'] = 'staging'
+      Boffin::Config.new.namespace.should == 'boffin:staging'
+      ENV['RACK_ENV'] = nil
     end
   end
 

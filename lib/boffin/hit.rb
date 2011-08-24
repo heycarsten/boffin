@@ -36,7 +36,7 @@ module Boffin
     end
 
     def set_windows(uniq)
-      WINDOW_UNIT_TYPES.each do |interval|
+      INTERVAL_TYPES.each do |interval|
         set_window_interval(interval, true) if uniq
         set_window_interval(interval)
       end

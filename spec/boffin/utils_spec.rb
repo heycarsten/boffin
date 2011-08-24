@@ -17,13 +17,6 @@ describe Boffin::Utils do
     end
   end
 
-  describe '::quick_token' do
-    it 'generates tokens' do
-      subject.quick_token.should be_a String
-      subject.quick_token.length.should > 6
-    end
-  end
-
   describe '::blank?' do
     it 'returns true for []' do
       subject.blank?([]).should be_true
@@ -107,15 +100,30 @@ describe Boffin::Utils do
   end
 
   describe '::uniquenesses_as_session_identifier' do
-    specify { subject.uniquenesses_as_session_identifier([]).size.should > 8 }
-    specify { subject.uniquenesses_as_session_identifier([nil, 'hi']).should == 'hi' }
-    specify { subject.uniquenesses_as_session_identifier([MockDitty.new]).should == 'mock_ditty:1' }
+    specify do
+      subject.uniquenesses_as_session_identifier([]).
+        should == Boffin::NIL_SESSION_MEMBER
+    end
+
+    specify do
+      subject.uniquenesses_as_session_identifier([nil, 'hi']).
+        should == 'hi'
+    end
+
+    specify do
+      subject.uniquenesses_as_session_identifier([MockDitty.new]).
+        should == 'mock_ditty:1'
+    end
   end
 
   describe '::object_as_session_identifier' do
     specify { subject.object_as_session_identifier(nil).should == '' }
-    specify { subject.object_as_session_identifier(MockDitty.new).should == 'mock_ditty:1' }
     specify { subject.object_as_session_identifier(3.14).should == '3.14' }
+
+    specify do
+      subject.object_as_session_identifier(MockDitty.new).
+        should == 'mock_ditty:1'
+    end
   end
 
   describe '::object_as_member' do
@@ -142,7 +150,7 @@ describe Boffin::Utils do
     specify { subject.object_as_namespace('ns').should == 'ns' }
   end
 
-  describe '::object_as_key(obj)' do
+  describe '::object_as_key' do
     specify { subject.object_as_key(MockDitty.new).should == '1' }
     specify { subject.object_as_key(100).should == 'MTAw' }
     specify { subject.object_as_key('/test?te=st').should == 'L3Rlc3Q/dGU9c3Q=' }

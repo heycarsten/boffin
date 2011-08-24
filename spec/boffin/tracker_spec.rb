@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe Boffin::Tracker do
   before :all do
+    SpecHelper.flush_keyspace!
     @tracker   = Boffin::Tracker.new(MockDitty, [:views, :likes, :shares])
     @instance1 = MockDitty.new(100)
     @instance2 = MockDitty.new(200)
@@ -142,7 +143,7 @@ describe Boffin::Tracker do
     it 'returns ids based on unique hit data when passed { unique: true } as an option' do
       ids = @tracker.top(:views, days: 3, counts: true, unique: true)
       ids.should == [
-        ['300', 8],
+        ['300', 7],
         ['200', 5],
         ['100', 5]
       ]

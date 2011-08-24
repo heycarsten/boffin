@@ -11,12 +11,12 @@ require 'boffin/hit'
 require 'boffin/trackable'
 
 module Boffin
-  WINDOW_UNIT_FORMATS = {
+  NIL_SESSION_MEMBER = 'boffin:nilsession'
+  INTERVAL_FORMATS = {
     hours:  '%F-%H',
     days:   '%F',
-    months: '%Y-%m'
-  }
-  WINDOW_UNIT_TYPES = WINDOW_UNIT_FORMATS.keys
+    months: '%Y-%m' }
+  INTERVAL_TYPES = INTERVAL_FORMATS.keys
 
   class UndefinedHitTypeError < StandardError; end
 

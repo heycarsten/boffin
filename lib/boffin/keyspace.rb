@@ -51,7 +51,7 @@ module Boffin
     end
 
     def hits_time_window(types, unit, time)
-      hits_window(types, time.strftime(WINDOW_UNIT_FORMATS[unit]))
+      hits_window(types, time.strftime(INTERVAL_FORMATS[unit]))
     end
 
   end

@@ -31,17 +31,11 @@ class MockMember
   def initialize(id = 1); @as_member = id; end
 end
 
-module BoffinSpecHelper
+module SpecHelper
   module_function
-  def clear_redis_keyspace!
-    if (keys = $redis.keys("#{$boffspace}*")).any?
+  def flush_keyspace!
+    if (keys = $redis.keys("#{Boffin.config.namespace}*")).any?
       $redis.del(*keys)
     end
-  end
-end
-
-RSpec.configure do |config|
-  config.before(:suite) do
-    BoffinSpecHelper.clear_redis_keyspace!
   end
 end

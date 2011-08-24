@@ -57,10 +57,10 @@ describe Boffin::Keyspace do
       @time = Time.local(2011, 1, 1, 23)
     end
 
-    Boffin::WINDOW_UNIT_TYPES.each do |format|
+    Boffin::INTERVAL_TYPES.each do |format|
       describe "given #{format} based window" do
         specify do
-          strf = Boffin::WINDOW_UNIT_FORMATS[format]
+          strf = Boffin::INTERVAL_FORMATS[format]
           @ks.hits_time_window(:views, format, @time).
             should == "b:mock_ditty:views:hits.#{@time.strftime(strf)}"
         end

@@ -27,10 +27,6 @@ module Boffin
       obj.respond_to?(:empty?) ? obj.empty? : !obj
     end
 
-    def quick_token(seed = 0x100000)
-      3.times.map { rand(seed).to_s(36) }.join
-    end
-
     def extract_time_unit(hsh)
       case
       when hsh.key?(:hours)  then [:hours,  hsh[:hours]]
@@ -60,7 +56,7 @@ module Boffin
       if (obj = aspects.flatten.reject { |u| blank?(u) }.first)
         object_as_session_identifier(obj)
       else
-        quick_token
+        NIL_SESSION_MEMBER
       end
     end
 
