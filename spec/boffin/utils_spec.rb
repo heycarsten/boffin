@@ -89,6 +89,15 @@ describe Boffin::Utils do
         should == [Time.local(2011, 2, 14, 12), Time.local(2011, 2, 15, 12)]
     end
 
+    specify do
+      subject.time_ago_range(@time, days: 3).
+        should == [
+          Time.local(2011, 2, 13, 12),
+          Time.local(2011, 2, 14, 12),
+          Time.local(2011, 2, 15, 12)
+        ]
+    end
+
     it 'ranges from n days away upto @time' do
       times = subject.time_ago_range(@time, days: 4)
       times.first.should == Time.local(2011, 2, 12, 12)

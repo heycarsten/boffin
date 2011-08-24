@@ -6,29 +6,29 @@ module Boffin
     end
 
     module ClassMethods
-      def boffin
-        @boffin ||= Tracker.new(self)
+      def boffin_tracker
+        @boffin_tracker ||= Tracker.new(self)
       end
 
-      def top_ids(hit_type, opts = {})
-        boffin.top(hit_type, opts)
-      end
-
-      def trending_ids(weighted_types, opts = {})
-        boffin.trending(weighted_types, opts)
+      def top_ids(type_or_weights, opts = {})
+        boffin_tracker.top(type_or_weights, opts)
       end
     end
 
-    def hits_by_session_id(sessid)
-      self.class.boffin.hits_by_session_id(self, sessid)
+    def hit(type, uniquenesses = [])
+      self.class.boffin_tracker.hit(type, self, uniquenesses)
     end
 
-    def hit_count(hit_type)
-      self.class.boffin.hit_count(self, hit_type)
+    def hit_count(type)
+      self.class.boffin_tracker.hit_count(type, self)
     end
 
-    def unique_hit_count(hit_type)
-      self.class.boffin.unique_hit_count(self, hit_type)
+    def uhit_count(type)
+      self.class.boffin_tracker.uhit_count(type, self)
+    end
+
+    def hit_count_for_session_id(type, sess_obj)
+      self.class.boffin_tracker.hit_count_for_session_id(type, self, sess_obj)
     end
 
   end

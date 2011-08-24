@@ -4,59 +4,149 @@ describe Boffin::Tracker do
   before :all do
     @tracker   = Boffin::Tracker.new(MockDitty, [:views, :likes, :shares])
     @instance1 = MockDitty.new(100)
-    @instance2 = MockDitty.new(101)
-    @instance3 = MockDitty.new(102)
+    @instance2 = MockDitty.new(200)
+    @instance3 = MockDitty.new(300)
+    @instance4 = MockDitty.new(400)
     @user1     = MockUser.new(1)
     @user2     = MockUser.new(2)
-    @time      = Time.local(2011, 1, 1)
+    @date      = Date.today
 
-    Timecop.freeze(@time) do
-      @tracker.hit(:views, @instance1)
-      @tracker.hit(:likes, @instance1, [@user1])
-      @tracker.hit(:views, @instance1, [nil, 'sess.1'])
-      @tracker.hit(:views, @instance1, [@user2])
-      @tracker.hit(:views, @instance2, [nil, nil])
-      @tracker.hit(:views, @instance3, [@user1])
+    Timecop.freeze(@date - 2) do
+      @tracker.hit(:views, @instance3)
+      @tracker.hit(:likes, @instance3, [@user1])
       @tracker.hit(:views, @instance3, ['sess.1'])
-      @tracker.hit(:views, @instance1, ['sess.2'])
-      @tracker.hit(:views, @instance1, [@user1])
+      @tracker.hit(:views, @instance3, ['sess.2'])
       @tracker.hit(:views, @instance3, [@user2])
+      @tracker.hit(:likes, @instance1, [nil, nil])
+      @tracker.hit(:views, @instance3, ['sess.4'])
+      @tracker.hit(:views, @instance3, [@user1])
+      @tracker.hit(:views, @instance2, [@user2])
+      @tracker.hit(:views, @instance3, [@user2])
+      @tracker.hit(:likes, @instance3)
+      @tracker.hit(:views, @instance3, ['sess.1'])
+      @tracker.hit(:views, @instance3)
+      @tracker.hit(:likes, @instance3, [@user1])
+      @tracker.hit(:views, @instance3, ['sess.1'])
+    end
+
+    Timecop.freeze(@date - 1) do
+      @tracker.hit(:views, @instance1)
+      @tracker.hit(:likes, @instance2, [@user1])
+      @tracker.hit(:views, @instance2, ['sess.4'])
+      @tracker.hit(:views, @instance2, [nil, @user1])
+      @tracker.hit(:views, @instance2, ['sess.3'])
+      @tracker.hit(:views, @instance1, ['sess.3'])
+      @tracker.hit(:views, @instance1, [@user1])
+      @tracker.hit(:views, @instance2, ['sess.2'])
+      @tracker.hit(:views, @instance1, [@user1])
+      @tracker.hit(:views, @instance1, [@user2])
+    end
+
+    @tracker.hit(:views, @instance3, ['sess.2'])
+    @tracker.hit(:views, @instance2, [@user2])
+    @tracker.hit(:likes, @instance2)
+    @tracker.hit(:views, @instance2, [@user1])
+    @tracker.hit(:views, @instance1, ['sess.4'])
+    @tracker.hit(:views, @instance3, ['sess.3'])
+    @tracker.hit(:views, @instance1, [@user1])
+    @tracker.hit(:views, @instance1, [@user2])
+  end
+
+  describe '#hit' do
+    it 'throws an error if the hit type is not in the list' do
+      -> { @tracker.hit(:view, @instance1) }.
+        should raise_error Boffin::UndefinedHitTypeError
     end
   end
 
-  describe '#hit(hit_type, instance, uniquenesses = [])' do
-    # Hit.new(self, hit_type, instance, uniquenesses)
+  describe '#hit_count' do
+    it 'throws an error if the hit type is not in the list' do
+      -> { @tracker.hit_count(:view, @instance1) }.
+        should raise_error Boffin::UndefinedHitTypeError
+    end
+
+    it 'returns the raw hit count for the instance' do
+      @tracker.hit_count(:views, @instance1).should == 8
+    end
+
+    it 'returns 0 for an instance that was never hit' do
+      @tracker.hit_count(:views, 'neverhit').should == 0
+    end
   end
 
-  describe '#hit_count(hit_type, instance)' do
-    # redis.get(keyspace.hit_count(hit_type, instance))
+  describe '#uhit_count' do
+    it 'throws an error if the hit type is not in the list' do
+      -> { @tracker.uhit_count(:view, @instance1) }.
+        should raise_error Boffin::UndefinedHitTypeError
+    end
+
+    it 'returns the unique hit count for the instance' do
+      @tracker.uhit_count(:views, @instance1).should == 5
+    end
+
+    it 'returns 0 for an instance that was never hit' do
+      @tracker.hit_count(:likes, @instance4).should == 0
+    end
   end
 
-  describe '#uhit_count(hit_type, instance)' do
-    # redis.zcard(keyspace.hits(hit_type, instance)).to_i
-  end
+  describe '#hit_count_for_session_id' do
+    it 'throws an error if the hit type is not in the list' do
+      -> { @tracker.hit_count_for_session_id(:view, @instance1, 'sess.1') }.
+        should raise_error Boffin::UndefinedHitTypeError
+    end
 
-  describe '#hit_count_for_session_id(hit_type, instance, sess_obj)' do
-    # sessid = Utils.object_as_session_identifier(sess_obj)
-    # redis.zscore(keyspace.hits(hit_type, instance), sessid).to_i
+    it 'returns the number of times the instance was hit by the session id' do
+      @tracker.hit_count_for_session_id(:views, @instance3, 'sess.1').should == 3
+    end
+
+    it 'returns a count of 0 if the session id never hit the instance' do
+      @tracker.hit_count_for_session_id(:views, @instance1, 'nohit').should == 0
+    end
   end
 
   describe '#top' do
+    it 'throws an error if passed hit type is invalid' do
+      -> { @tracker.top(:view, days: 3) }.
+        should raise_error Boffin::UndefinedHitTypeError
+    end
+
+    it 'throws an error if passed weights with hit type that is invalid' do
+      -> { @tracker.top({ view: 1 }, days: 3) }.
+        should raise_error Boffin::UndefinedHitTypeError
+    end
+
     it 'returns ids ordered by hit counts of weighted totals' do
-      ids = @tracker.top({ views: 10, likes: 30 }, days: 3)
+      ids = @tracker.top({ views: 1, likes: 2 }, days: 3)
+      ids.should == ['300', '200', '100']
     end
 
     it 'returns ids ordered by total counts of a specific hit type' do
       ids = @tracker.top(:views, days: 3)
+      ids.should == ['300', '100', '200']
     end
 
-    it 'returns ids in ascending order when passed order: "asc" as an option' do
+    it 'returns ids in ascending order when passed { order: "asc" } as an option' do
       ids = @tracker.top(:views, days: 3, order: 'asc')
+      ids.should == ['200', '100', '300']
     end
-  end
 
-  describe '#utop' do
-    it 'calculates results based on only unique hit data'
+    it 'returns ids and counts when passed { counts: true } as an option' do
+      ids = @tracker.top(:views, days: 3, counts: true)
+      ids.should == [
+        ['300', 12],
+        ['100', 8],
+        ['200', 7]
+      ]
+    end
+
+    it 'returns ids based on unique hit data when passed { unique: true } as an option' do
+      ids = @tracker.top(:views, days: 3, counts: true, unique: true)
+      ids.should == [
+        ['300', 8],
+        ['200', 5],
+        ['100', 5]
+      ]
+    end
   end
 
   describe '#keyspace' do

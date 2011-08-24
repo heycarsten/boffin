@@ -12,23 +12,28 @@ module Boffin
     end
 
     def hit(hit_type, instance, uniquenesses = [])
+      validate_hit_type(hit_type)
       Hit.new(self, hit_type, instance, uniquenesses)
     end
 
     def hit_count(hit_type, instance)
-      redis.get(keyspace.hit_count(hit_type, instance))
+      validate_hit_type(hit_type)
+      redis.get(keyspace.hit_count(hit_type, instance)).to_i
     end
 
     def uhit_count(hit_type, instance)
+      validate_hit_type(hit_type)
       redis.zcard(keyspace.hits(hit_type, instance)).to_i
     end
 
     def hit_count_for_session_id(hit_type, instance, sess_obj)
+      validate_hit_type(hit_type)
       sessid = Utils.object_as_session_identifier(sess_obj)
       redis.zscore(keyspace.hits(hit_type, instance), sessid).to_i
     end
 
     def top(type_or_weights, opts = {})
+      validate_hit_type(type_or_weights)
       unit, size = *Utils.extract_time_unit(opts)
       keyspace   = keyspace(opts[:unique])
       if type_or_weights.is_a?(Hash)
@@ -36,11 +41,6 @@ module Boffin
       else
         union(keyspace, type_or_weights, unit, size, opts)
       end
-    end
-
-    def utop(type_or_weights, opts = {})
-      opts[:unique] = true
-      top(type_or_weights, opts)
     end
 
     def object_as_member(obj)
@@ -57,14 +57,24 @@ module Boffin
 
     private
 
+    def validate_hit_type(hit_type)
+      return if @hit_types.empty?
+      (hit_type.is_a?(Hash) ? hit_type.keys : [hit_type]).each do |type|
+        next if @hit_types.include?(type)
+        raise UndefinedHitTypeError, "#{type} is not in the list of " \
+        "valid hit types for this Tracker, valid types are: " \
+        "#{@hit_types.inspect}"
+      end
+    end
+
     def union(keyspace, type, unit, size, opts = {})
       keys = keyspace.hit_time_windows(type, unit, size)
       zfetch(keyspace.hits_union(type, unit, size), keys, opts)
-      keys
     end
 
     def multiunion(keyspace, weights, unit, size, opts = {})
-      keys = weights.keys.map { |type| union(keyspace, type, unit, size, opts) }
+      weights.keys.each { |t| union(keyspace, t, unit, size, opts) }
+      keys = weights.keys.map { |t| keyspace.hits_union(t, unit, size) }
       zfetch(keyspace.hits_union_multi(weights, unit, size), keys, {
         weights: weights.values
       }.merge(opts))
@@ -74,7 +84,7 @@ module Boffin
       zrangeopts = {
         counts: opts.delete(:counts),
         order:  (opts.delete(:order) || :desc).to_sym }
-      if redis.zcard(storekey) == 0
+      if redis.zcard(storkey) == 0
         redis.zunionstore(storkey, keys, opts)
         redis.expire(storkey, @config.cache_expire_secs)
       end
@@ -84,8 +94,8 @@ module Boffin
     def zrange(key, opts)
       args = [key, 0, -1, opts[:counts] ? { withscores: true } : {}]
       result = case opts[:order]
-        when :asc  then rdb.zrange(*args)
-        when :desc then rdb.zrevrange(*args)
+        when :asc  then redis.zrange(*args)
+        when :desc then redis.zrevrange(*args)
       end
       if opts[:counts]
         result.each_slice(2).map { |mbr, score| [mbr, score.to_i] }

@@ -3,16 +3,19 @@ require 'bundler/setup'
 require 'rspec'
 require 'redis'
 require 'timecop'
-require 'logger'
+
+$redis = if ENV['DEBUG']
+  require 'logger'
+  Redis.connect(logger: Logger.new(STDERR))
+else
+  Redis.connect
+end
 
 require File.expand_path('../../lib/boffin', __FILE__)
 
-$redis     = Redis.connect
-$boffspace = (ENV['BOFFSPACE'] || 'boffin_test')
-
 Boffin.config do |c|
   c.redis     = $redis
-  c.namespace = $boffspace
+  c.namespace = 'boffin_test'
 end
 
 class MockDitty
