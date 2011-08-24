@@ -1,25 +1,10 @@
 # Boffin
 
-Dead simple trending / hit counting for Ruby objects using Redis.
+Hit tracking and reporting of Ruby objects using Redis. Docs are on the way, but
+in the meantime please [read the specs](https://github.com/heycarsten/boffin/tree/master/spec/boffin)
+for the sweet details that you crave.
 
-## Using it
-
-Configure Boffin if you need to, the defaults are:
-
-```ruby
-Boffin.configure do |c|
-  c.redis = Redis.connect
-  c.namespace = 'boffin'
-  c.hours_window_secs  = 1.day
-  c.days_window_secs   = 1.month
-  c.months_window_secs = 1.year
-  c.cache_expire_secs  = 1.hour
-end
-```
-
-For all configuration stuff check out [lib/boffin/config.rb](https://github.com/heycarsten/boffin/blob/master/lib/boffin/config.rb).
-
-### Use it with models
+## Use Boffin with your favourite ORM
 
 Provide a list of valid hit types to ensure you never misspell them:
 
@@ -51,9 +36,8 @@ Boffin will use whatever you give it as uniqueness, for example say you have a
 controller action that is only available if a user is logged in, then your hit
 call would look like this:
 
-If the object passed in responds to `#as_unique_member` or `#id` it will be used
-as an identifier. If the object is a number, string, or symbol `#to_s` is called
-and the result is used.
+If the object passed in responds to `#as_member` or `#id` it will be used
+as an identifier. Otherwise `#to_s` is called and the result is used.
 
 You can pass multiple objects and the first one that is not blank (`nil`, `[]`,
 `{}`, or `''`) will be used:
@@ -78,12 +62,12 @@ get '/listings/:id' do
 end
 
 put '/listings/:id/like' do
-  @listing = Listing.get(params[:id])
+  @listing = Listing[params[:id]]
   @listing.hit(:likes, [current_user, session.id])
 end
 
 post '/listings/:id/share' do
-  @listing = Listing.get(params[:id])
+  @listing = Listing[params[:id]]
   @listing.hit(:shares, [current_user, session.id])
 end
 ```
@@ -101,18 +85,17 @@ After some hits have been tracked, you can start to do some queries:
 Listing.top(:views, days: 5)
 
 # Get IDs of the most liked listings in the past 5 days.
-Listing.top(:liked, days: 5)
+Listing.top(:likes, days: 5)
 
 # Get IDs of the most liked, viewed, and shared listings with likes weighted
 # higher than views in the past 12 hours.
 Listing.top({ likes: 2, views: 1, shares: 3 }, hours: 12)
 ```
 
-### Use it on anything
+## Use Boffin with anything really
 
 ```ruby
 @tracker = Boffin::Tracker.new(:colours, [:likes, :dislikes])
-@tracker = Boffin.track(:colours, [:likes, :dislikes]) # Same as above
 
 @tracker.hit(:likes, 'red')
 @tracker.hit(:dislikes, 'blue')
@@ -122,5 +105,18 @@ Listing.top({ likes: 2, views: 1, shares: 3 }, hours: 12)
 
 @tracker.top(:likes, days: 30)
 #=> ["green", "red"]
-
 ```
+
+## The Future&trade; & Stuff
+
+ * Tested on Ruby 1.9.2 MRI
+ * Ability to unhit an instance (if a model is destroyed for example.)
+ * Documentation!
+ * Some nice examples with pretty things.
+ * ORM adapters for niceness and tighter integration
+ * Reporting DSL thingy
+ * Web framework integration (helpers for tracking hits)
+ * Ability to blend unique hits with raw hits
+
+What's with the name?!? It's all in [good humour](http://en.wikipedia.org/wiki/Boffin)!
+Are you Brittish? No, but [this dude](http://github.com/aanand) is :-)
