@@ -4,7 +4,22 @@ Hit tracking and reporting of Ruby objects using Redis. Docs are on the way, but
 in the meantime please [read the specs](https://github.com/heycarsten/boffin/tree/master/spec/boffin)
 for the sweet details that you crave.
 
-## Use Boffin with your favourite ORM
+## At a glance
+
+```ruby
+WordsTracker = Boffin.track(:words, [:searches, :tweets])
+
+post '/tweets' do
+  @tweet = Tweet.create(params[:tweet])
+  params[:tweet][:body].split.each do |word|
+    WordsTracker.hit(:tweets, word, [current_user])
+  end
+end
+
+post '/search' do
+  params[:q]
+end
+```
 
 Provide a list of valid hit types to ensure you never misspell them:
 
@@ -107,16 +122,26 @@ Listing.top({ likes: 2, views: 1, shares: 3 }, hours: 12)
 #=> ["green", "red"]
 ```
 
-## The Future&trade; & Stuff
+## The Future&trade
 
- * Tested on Ruby 1.9.2 MRI
- * Ability to unhit an instance (if a model is destroyed for example.)
  * Documentation!
+ * Ability to hit multiple instances in one command
+ * Ability to unhit an instance (if a model is destroyed for example.)
+ * Ability to get hit-count range for an instance
  * Some nice examples with pretty things.
  * ORM adapters for niceness and tighter integration
  * Reporting DSL thingy
  * Web framework integration (helpers for tracking hits)
  * Ability to blend unique hits with raw hits
 
-What's with the name?!? It's all in [good humour](http://en.wikipedia.org/wiki/Boffin)!
-Are you Brittish? No, but [this dude](http://github.com/aanand) is :-)
+## Stuff
+
+Boffin is tested on MRI Ruby 1.9.2
+
+### What's with the name?!?
+
+It's all in [good humour](http://en.wikipedia.org/wiki/Boffin)!
+
+### Are you Brittish?
+
+No, but [this guy](http://github.com/aanand) is :-)
