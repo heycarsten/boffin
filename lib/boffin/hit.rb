@@ -7,7 +7,7 @@ module Boffin
       @type     = type
       @tracker  = tracker
       @instance = instance
-      @member   = @tracker.object_as_member(@instance)
+      @member   = Utils.object_as_member(@instance)
       store
       freeze
     end

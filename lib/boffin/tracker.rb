@@ -43,10 +43,6 @@ module Boffin
       end
     end
 
-    def object_as_member(obj)
-      @config.object_as_member_proc.(obj)
-    end
-
     def redis
       @config.redis
     end

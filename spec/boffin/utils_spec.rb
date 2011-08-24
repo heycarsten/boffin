@@ -1,9 +1,5 @@
 require 'spec_helper'
 
-class MockObject
-  def id; 100; end
-end
-
 describe Boffin::Utils do
   describe '::underscore' do
     it 'works with namespaces' do
@@ -113,23 +109,41 @@ describe Boffin::Utils do
   describe '::uniquenesses_as_session_identifier' do
     specify { subject.uniquenesses_as_session_identifier([]).size.should > 8 }
     specify { subject.uniquenesses_as_session_identifier([nil, 'hi']).should == 'hi' }
-    specify { subject.uniquenesses_as_session_identifier([MockObject.new]).should == 'mock_object:100' }
+    specify { subject.uniquenesses_as_session_identifier([MockDitty.new]).should == 'mock_ditty:1' }
   end
 
   describe '::object_as_session_identifier' do
     specify { subject.object_as_session_identifier(nil).should == '' }
-    specify { subject.object_as_session_identifier(MockObject.new).should == 'mock_object:100' }
+    specify { subject.object_as_session_identifier(MockDitty.new).should == 'mock_ditty:1' }
     specify { subject.object_as_session_identifier(3.14).should == '3.14' }
+  end
+
+  describe '::object_as_member' do
+    it 'calls #as_member on the object if available' do
+      obj = MockMember.new(100)
+      subject.object_as_member(obj).should == '100'
+    end
+
+    it 'calls #id.to_s on the object if available' do
+      obj = MockDitty.new(100)
+      subject.object_as_member(obj).should == '100'
+    end
+
+    it 'calls #to_s on everything else' do
+      subject.object_as_member(3.14).should == '3.14'
+      subject.object_as_member(:symbol).should == 'symbol'
+      subject.object_as_member('string').should == 'string'
+    end
   end
 
   describe '::object_as_namespace' do
     specify { subject.object_as_namespace(:ns).should == 'ns' }
-    specify { subject.object_as_namespace(MockObject).should == 'mock_object' }
+    specify { subject.object_as_namespace(MockDitty).should == 'mock_ditty' }
     specify { subject.object_as_namespace('ns').should == 'ns' }
   end
 
   describe '::object_as_key(obj)' do
-    specify { subject.object_as_key(MockObject.new).should == '100' }
+    specify { subject.object_as_key(MockDitty.new).should == '1' }
     specify { subject.object_as_key(100).should == 'MTAw' }
     specify { subject.object_as_key('/test?te=st').should == 'L3Rlc3Q/dGU9c3Q=' }
   end

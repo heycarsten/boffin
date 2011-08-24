@@ -20,12 +20,16 @@ end
 
 class MockDitty
   attr :id
-  def initialize(id = 1); @id = id end
+  def initialize(id = 1); @id = id; end
 end
 
 # Just a different namespace to make the specs easier to follow.
 class MockUser < MockDitty; end
 
+class MockMember
+  attr :as_member
+  def initialize(id = 1); @as_member = id; end
+end
 
 module BoffinSpecHelper
   module_function
@@ -35,7 +39,6 @@ module BoffinSpecHelper
     end
   end
 end
-
 
 RSpec.configure do |config|
   config.before(:suite) do

@@ -64,16 +64,34 @@ module Boffin
       end
     end
 
-    def object_as_session_identifier(obj)
-      obj.respond_to?(:id) ? "#{underscore(obj.class)}:#{obj.id}" : obj.to_s
-    end
-
     def object_as_namespace(obj)
       case obj
       when String, Symbol
         obj.to_s
       else
         underscore(obj)
+      end
+    end
+
+    def object_as_session_identifier(obj)
+      case
+      when obj.respond_to?(:id)
+        "#{underscore(obj.class)}:#{obj.id}"
+      when obj.respond_to?(:as_member)
+        "#{underscore(obj.class)}:#{obj.as_member}"
+      else
+        obj.to_s
+      end
+    end
+
+    def object_as_member(obj)
+      case
+      when obj.respond_to?(:id)
+        obj.id.to_s
+      when obj.respond_to?(:as_member)
+        obj.as_member.to_s
+      else
+        obj.to_s
       end
     end
 

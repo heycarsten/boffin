@@ -1,9 +1,5 @@
 require 'spec_helper'
 
-class MockClass
-  def id; 1; end
-end
-
 describe Boffin::Config do
   describe '#namespace' do
     specify { subject.namespace.should == 'boffin' }
@@ -65,24 +61,6 @@ describe Boffin::Config do
   end
 
   describe '#cache_expire_secs' do
-    specify { subject.cache_expire_secs.should == 1800 } # 30 minute
-  end
-
-  describe '#object_as_member_proc' do
-    it 'calls #as_member on the object if available' do
-      obj = Class.new { def as_member; 'obj1'; end }.new
-      subject.object_as_member_proc.(obj).should == 'obj1'
-    end
-
-    it 'calls #id.to_s on the object if available' do
-      obj = Class.new { def id; 100; end }.new
-      subject.object_as_member_proc.(obj).should == '100'
-    end
-
-    it 'calls #to_s on everything else' do
-      subject.object_as_member_proc.(3.14).should == '3.14'
-      subject.object_as_member_proc.(:symbol).should == 'symbol'
-      subject.object_as_member_proc.('string').should == 'string'
-    end
+    specify { subject.cache_expire_secs.should == 1800 } # 30 minutes
   end
 end
