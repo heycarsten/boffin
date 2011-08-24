@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     boffin (0.1.0)
+      redis (> 2.2)
 
 GEM
   remote: http://rubygems.org/
@@ -23,6 +24,5 @@ PLATFORMS
 
 DEPENDENCIES
   boffin!
-  redis (~> 2.2)
   rspec (~> 2.6)
   timecop

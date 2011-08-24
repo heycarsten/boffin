@@ -1,6 +1,7 @@
 require 'base64'
 require 'date'
 require 'time'
+require 'redis'
 require 'boffin/version'
 require 'boffin/utils'
 require 'boffin/config'
