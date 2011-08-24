@@ -10,7 +10,6 @@ Configure Boffin if you need to, the defaults are:
 Boffin.configure do |c|
   c.redis = Redis.connect
   c.namespace = 'boffin'
-  c.disable_unique_tracking = false
   c.hours_window_secs  = 1.day
   c.days_window_secs   = 1.month
   c.months_window_secs = 1.year
@@ -20,14 +19,31 @@ end
 
 For all configuration stuff check out [lib/boffin/config.rb](https://github.com/heycarsten/boffin/blob/master/lib/boffin/config.rb).
 
-### Use it on models
+### Use it with models
 
-Include Boffin's insight into any Ruby class that responds to `#id`:
+Provide a list of valid hit types to ensure you never misspell them:
 
 ```ruby
-class Listing < My::ORM
+Boffin.track(Listing, [:views, :likes, :shares])
+```
+
+Or don't, if that's not how you roll:
+
+```ruby
+Boffin.track(Listing)
+```
+
+You can also use the mixin directly if that's more your style:
+
+```ruby
+class Listing < Sequel::Model
   include Boffin::Trackable
-  ...
+  boffin_tracker.hit_types = [:views, :likes, :shares]
+
+  def as_member
+    # Some funky composite key stuff maybe?
+    [agent_id, property_id].join('-')
+  end
 end
 ```
 
@@ -48,8 +64,8 @@ an error if you are using the strictly unique hit call `#uhit`:
 ```ruby
 get '/listings/:id/map'
   authenticate!
-  @listing = Listing.get(params[:id])
-  @listing.hit(:view, [current_user])
+  @listing = Listing[params[:id]]
+  @listing.hit(:views, [current_user])
 end
 ```
 
@@ -57,18 +73,18 @@ Then use Boffin to record hits to the model:
 
 ```ruby
 get '/listings/:id' do
-  @listing = Listing.get(params[:id])
-  @listing.hit(:view, [current_user, session.id])
+  @listing = Listing[params[:id]]
+  @listing.hit(:views, [current_user, session.id])
 end
 
 put '/listings/:id/like' do
   @listing = Listing.get(params[:id])
-  @listing.hit(:like, [current_user, session.id])
+  @listing.hit(:likes, [current_user, session.id])
 end
 
-put '/listings/:id/inquire' do
+post '/listings/:id/share' do
   @listing = Listing.get(params[:id])
-  @listing.hit(:inquiry, [current_user, session.id])
+  @listing.hit(:shares, [current_user, session.id])
 end
 ```
 
@@ -87,18 +103,24 @@ Listing.top(:views, days: 5)
 # Get IDs of the most liked listings in the past 5 days.
 Listing.top(:liked, days: 5)
 
-# Get IDs of the most liked, and viewed listings with likes weighted higher than
-# views in the past 5 days.
-Listing.trending({ likes: 2, views: 1 }, days: 5)
+# Get IDs of the most liked, viewed, and shared listings with likes weighted
+# higher than views in the past 12 hours.
+Listing.top({ likes: 2, views: 1, shares: 3 }, hours: 12)
 ```
 
 ### Use it on anything
 
 ```ruby
-@tracker = Boffin::Tracker.new
+@tracker = Boffin::Tracker.new(:colours, [:likes, :dislikes])
+@tracker = Boffin.track(:colours, [:likes, :dislikes]) # Same as above
 
-@tracker.hit(:urls, 'http://example.com/mypage', :views, ['session.1'])
-@tracker.hit(:listing, @listing, :views)
-@tracker.top(:listing, :views, hours: 6)
-@tracker.hit_count(:listing, :views)
+@tracker.hit(:likes, 'red')
+@tracker.hit(:dislikes, 'blue')
+@tracker.hit(:likes, 'green')
+@tracker.hit(:dislikes, 'red')
+@tracker.hit(:likes, 'green')
+
+@tracker.top(:likes, days: 30)
+#=> ["green", "red"]
+
 ```
