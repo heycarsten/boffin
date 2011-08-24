@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.homepage      = 'http://github.com/heycarsten/boffin'
   s.email         = 'heycarsten@gmail.com'
   s.authors       = ['Carsten Nielsen']
-  s.summary       = 'Track hits to your models for trends and hit counts'
+  s.summary       = 'Boffin tracks hits to your Ruby objects with Redis for trending and top lists.'
 
   s.files         = `git ls-files`.split(?\n)
   s.test_files    = `git ls-files -- spec/*`.split(?\n)
@@ -20,6 +20,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'timecop'
 
   s.description = <<END
-
+Boffin uses Redis to track hits on Ruby objects, these can be models, or even
+just strings. You can then query for top objects based on hit type, or you can
+combine hits together and even apply weights to favour a certain type of hit
+over other types.
 END
 end
