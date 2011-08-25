@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.homepage          = 'http://github.com/heycarsten/boffin'
   s.author            = 'Carsten Nielsen'
   s.email             = 'heycarsten@gmail.com'
-  s.summary           = 'Boffin tracks hits to your Ruby objects with Redis for trending and top lists.'
+  s.summary           = 'Hit tracking library for Ruby using Redis'
   s.has_rdoc          = 'yard'
   s.rubyforge_project = 'boffin'
   s.files             = `git ls-files`.split(?\n)

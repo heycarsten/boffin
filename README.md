@@ -1,7 +1,7 @@
 Boffin
 ======
 
-Hit tracking library for Ruby using [Redis](http://redis.io).
+Hit tracking library for Ruby using [Redis](http://redis.io)
 
 About
 -----
