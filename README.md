@@ -222,19 +222,19 @@ Not just for models
 -------------------
 
 As stated before, you can use Boffin to track anything. Maybe you'd like to
-track your friends' favourite colours:
+track your friends' favourite and least favourite colours:
 
 ```ruby
-@tracker = Boffin::Tracker.new(:colours, [:likes, :dislikes])
+@tracker = Boffin::Tracker.new(:colours, [:faves, :unfaves])
 
-@tracker.hit(:likes,    'red',   ['lena'])
-@tracker.hit(:dislikes, 'blue',  ['lena'])
-@tracker.hit(:likes,    'green', ['soren'])
-@tracker.hit(:dislikes, 'red',   ['soren'])
-@tracker.hit(:likes,    'green', ['jens'])
-@tracker.hit(:dislikes, 'green', ['jens'])
+@tracker.hit(:faves,   'red',    ['lena'])
+@tracker.hit(:unfaves, 'blue',   ['lena'])
+@tracker.hit(:faves,   'green',  ['soren'])
+@tracker.hit(:unfaves, 'red',    ['soren'])
+@tracker.hit(:faves,   'green',  ['jens'])
+@tracker.hit(:unfaves, 'yellow', ['jens'])
 
-@tracker.top(:likes, months: 1)
+@tracker.top(:faves, months: 1)
 ```
 
 Or, perhaps you'd like to clone Twitter? Using Boffin, all the work is
