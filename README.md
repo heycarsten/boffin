@@ -64,7 +64,7 @@ Tracking
 --------
 
 A Tracker is responsible for maintaining a namespace for hits. For our examples
-we will have a model called `Listing` it represents a listing in our real estate
+we will have a model called `Listing` it represents a listing in our realty
 web app. We want to track when someone likes, shares, or views a listing.
 
 Our example web app uses [Sinatra](http://sinatrarb.com) as its framework, and
