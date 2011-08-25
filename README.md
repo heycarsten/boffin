@@ -56,7 +56,7 @@ Boffin.configure do |c|
   c.hours_window_secs  = 3.days     # Time to maintain hourly interval data
   c.days_window_secs   = 3.months   # Time to maintain daily interval data
   c.months_window_secs = 3.years    # Time to maintain monthly interval data
-  c.cache_expire_secs  = 30.minutes # Time to cache top hits result sets
+  c.cache_expire_secs  = 15.minutes # Time to cache Tracker#top result sets
 end
 ```
 
@@ -212,8 +212,10 @@ Listing.top_ids({ likes: 2, views: 1 }, hours: 12, counts: true)
 ```
 
 Boffin records hits in time intervals: hours, days, and months. Each interval
-has a window of time that it is available, before it expires. These windows are
-configurable. See **Configuration** above.
+has a window of time that it is available before it expires; these windows are
+configurable. It's also important to note that the results returned by these
+methods are cached for the duration of `Boffin.config.cache_expire_secs`. See
+**Configuration** above.
 
 More
 ====
