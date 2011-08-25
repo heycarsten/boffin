@@ -13,7 +13,6 @@ module Boffin
     def initialize(opts = {}, &block)
       yield(self) if block_given?
       update(opts)
-      self
     end
 
     def update(updates = {})

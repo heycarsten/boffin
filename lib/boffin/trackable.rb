@@ -7,7 +7,7 @@ module Boffin
 
     module ClassMethods
       def boffin
-        @boffin_tracker ||= Tracker.new(self)
+        @boffin ||= ::Boffin::Tracker.new(self)
       end
 
       def top_ids(type_or_weights, opts = {})

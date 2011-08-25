@@ -31,6 +31,14 @@ class MockMember
   def initialize(id = 1); @as_member = id; end
 end
 
+class MockTrackableIncluded < MockDitty
+  include Boffin::Trackable
+  boffin.hit_types = [:views, :likes]
+end
+
+class MockTrackableInjected < MockDitty; end
+Boffin.track(MockTrackableInjected, [:views, :likes])
+
 module SpecHelper
   module_function
   def flush_keyspace!

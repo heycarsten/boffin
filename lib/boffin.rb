@@ -21,12 +21,10 @@ module Boffin
   # Raised when 
   class UndefinedHitTypeError < StandardError; end
 
-  # 
-  #
   # @param [Symbol] format the format type, `:text` or `:html`
   # @return [String] the object converted into the expected format.
-  def self.config(&block)
-    @config ||= Config.new(&block)
+  def self.config(opts = {}, &block)
+    @config ||= Config.new(opts, &block)
   end
 
   def self.track(mod_or_ns, hit_types = [])
@@ -35,8 +33,8 @@ module Boffin
       Tracker.new(mod_or_ns, hit_types)
     else
       mod_or_ns.send(:include, Trackable)
-      mod_or_ns.boffin_tracker.hit_types.concat(hit_types)
-      mod_or_ns.boffin_tracker
+      mod_or_ns.boffin.hit_types = hit_types
+      mod_or_ns.boffin
     end
   end
 end

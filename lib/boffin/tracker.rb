@@ -1,7 +1,8 @@
 module Boffin
   class Tracker
 
-    attr_reader :namespace, :hit_types, :config
+    attr_reader :namespace, :config
+    attr_accessor :hit_types
 
     def initialize(class_or_ns, hit_types = [], config = Boffin.config.dup)
       @namespace = Utils.object_as_namespace(class_or_ns)
