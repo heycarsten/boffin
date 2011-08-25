@@ -1,189 +1,292 @@
-# Boffin
+Boffin
+======
 
-Hit tracking and reporting of Ruby objects using Redis. Docs are on the way, but
-in the meantime please [read the specs](https://github.com/heycarsten/boffin/tree/master/spec/boffin)
-for the sweet details that you crave.
+Hit tracking library for Ruby using [Redis](http://redis.io).
 
-## At a glance
+Description
+-----------
 
-```ruby
-WordsTracker = Boffin.track(:words, [:searches, :tweets])
+Boffin is a library for tracking hits to things in your Ruby application. Things
+can be IDs of records in a database, strings representing tags or topics, URLs
+of webpages, names of places, whatever you desire. Boffin is able to provide
+lists of those things based on most hits, least hits, it can even report on
+weighted combinations of different types of hits.
 
-post '/tweets' do
-  @tweet = Tweet.create(params[:tweet])
-  @tweet.text.split.each do |word|
-    WordsTracker.hit(:tweets, word, [current_user])
-  end
-end
+Resources
+---------
 
-post '/search' do
-  params[:q].split.each do |word|
-    WordsTracker.hit(:searches, word, [current_user, session.id])
-  end
-end
+ * [Source Code](https://github.com/heycarsten/boffin)
+ * [Issue Tracker](https://github.com/heycarsten/boffin/issues)
+ * [Test Suite](https://github.com/heycarsten/boffin/tree/master/spec)
+ * [License](https://github.com/heycarsten/boffin/blob/master/LICENSE)
 
-get '/trending' do
-  @words = WordsTracker.top({ searches: 1, tweets: 2 }, hours: 8)
-end
-```
+Getting started
+---------------
 
-You can also use the mixin directly if that's more your style:
+You need a functioning [Redis](http://redis.io) installation. Once Redis is
+installed you can start it by running `redis-server`, this will run Redis in the
+foreground.
 
-```ruby
-class Listing < Sequel::Model
-  include Boffin::Trackable
-  boffin_tracker.hit_types = [:views, :likes, :shares]
-
-  def as_member
-    # Some funky composite key stuff maybe?
-    [agent_id, property_id].join('-')
-  end
-end
-```
-
-## Hiredis
-
-If you're on OS X or Linux you'll probably want to use pietern/hiredis-rb
-because it's faster. Require Hiredis before Boffin and `redis` will use
-`hiredis` as its adapter:
+You can use Boffin in many different contexts, but the most common one is
+probably that of a Rails or Sinatra application. Just add `boffin` to your
+[Gemfile](http://gembundler.com):
 
 ```ruby
-require 'hiredis'
-require 'boffin'
+gem 'boffin'
 ```
 
-Or if you're `Bundler.require`in' it up, then somewhere in your Gemfile will
-appear:
+For utmost performance on *nix-based systems, require
+[hiredis](https://github.com/pietern/hiredis-rb) before you require Boffin:
 
 ```ruby
 gem 'hiredis'
 gem 'boffin'
 ```
 
-## Hit Uniqueness
+Configuration
+-------------
 
-Boffin will use whatever you give it to identify a hit as unique, for example,
-say you have a controller action that is only available if a user is logged in,
-then your hit call might look something like this:
+Most of Boffin's default configuration options are quite reasonable, but they
+are easy to change if required:
 
 ```ruby
-class ListingsController < ApplicationController
-
-  before_filter :authenticate_user!, only: [:like]
-
-  def like
-    @listing = Listing.find(params[:id])
-    @listing.hit(:likes, [current_user])
-  end
-
+Boffin.configure do |c|
+  c.redis              = MyApp.redis             # Redis.connect by default
+  c.namespace          = "tracking:#{MyApp.env}" # Redis key namespace
+  c.hours_window_secs  = 3.days     # Time to maintain hourly interval data
+  c.days_window_secs   = 3.months   # Time to maintain daily interval data
+  c.months_window_secs = 3.years    # Time to maintain monthly interval data
+  c.cache_expire_secs  = 30.minutes # Time to cache top hits result sets
 end
 ```
 
-For an action that can be accessed by a non-user 
+Tracking
+--------
+
+A Tracker is responsible for maintaining a namespace for hits. For our examples
+we will have a model called `Listing` it represents a listing in our real estate
+web app. We want to track when someone likes, shares, or views a listing.
+
+Our example web app uses [Sinatra](http://sinatrarb.com) as its framework, and
+[Sequel](http://sequel.rubyforge.org)::Model as its ORM. It's important to note
+that Boffin has no requirements on any of these things, it can be used to track
+any Ruby class in any environment.
+
+Start by telling Boffin to make the Listing model trackable:
 
 ```ruby
-class ListingsController < ApplicationController
-  ...
+Boffin.track(Listing)
+```
 
-  def show
-    @listing = Listing.find(params[:id])
-    @listing.hit(:views, [current_user, session[:session_id]])
-  end
+**_or_**
 
+```ruby
+class Listing < Sequel::Model
+  include Boffin::Trackable
 end
 ```
 
-If the object passed in responds to `#as_member` or `#id` it will be used
-as an identifier. Otherwise `#to_s` is called and the result is used.
-
-You can pass multiple objects and the first one that is not blank (`nil`, `[]`,
-`{}`, or `''`) will be used:
-
-If no unique value is available Boffin will make one up for you, or will raise
-an error if you are using the strictly unique hit call `#uhit`:
+You can optionally specify the types of hits that are acceptable, this is good
+practice and will save frustrating moments where you accidentally type `:view`
+instead of `:views`, to do that:
 
 ```ruby
-get '/listings/:id/map'
-  authenticate!
-  @listing = Listing[params[:id]]
-  @listing.hit(:views, [current_user])
+Boffin.track(Listing, [:likes, :shares, :views])
+```
+
+**_or_**
+
+```ruby
+class Listing < Sequel::Model
+  include Boffin::Trackable
+  boffin.hit_types = [:likes, :shares, :views]
 end
 ```
 
-Then use Boffin to record hits to the model:
+Now to track hits on instances of the Listing model, simply:
 
 ```ruby
 get '/listings/:id' do
   @listing = Listing[params[:id]]
-  @listing.hit(:views, [current_user, session.id])
-end
-
-put '/listings/:id/like' do
-  @listing = Listing[params[:id]]
-  @listing.hit(:likes, [current_user, session.id])
-end
-
-post '/listings/:id/share' do
-  @listing = Listing[params[:id]]
-  @listing.hit(:shares, [current_user, session.id])
+  @listing.hit(:views)
+  haml :'listings/show'
 end
 ```
+
+However you will probably want to provide Boffin with some uniqueness to
+identify hits from particular users or sessions:
+
+```ruby
+get '/listings/:id' do
+  @listing = Listing[params[:id]]
+  @listing.hit(:views, [current_user, session[:id]])
+  haml :'listings/show'
+end
+```
+
+Boffin now adds uniqueness to the hit in the form of `current_user.id` if
+available. If `current_user` is nil, Boffin then uses `session[:id]`. You can
+provide as many uniquenesses as you'd like, the first one that is not blank
+(`nil`, `false`, `[]`, `{}`, or `''`) will be used.
+
+It could get a bit tedious having to add `[current_user, session[:id]]` whenever
+we want to hit an instance, so let's create a helper:
+
+```ruby
+helpers do
+  def hit(trackable, type)
+    trackable.hit(type, [current_user, session[:id]])
+  end
+end
+```
+
+For these examples we are in the context of a Sinatra application, but this is
+applicable to a Rails application as well:
+
+```ruby
+class ApplicationController < ActionController::Base
+  protected
+  def hit(trackable, type)
+    trackable.hit(type, [current_user, session[:session_id]])
+  end
+end
+```
+
+You get the idea, now storing a hit is as easy as:
+
+```ruby
+get '/listings/:id' do
+  @listing = Listing[params[:id]]
+  hit @listing, :views
+  haml :'listings/show'
+end
+```
+
+Reporting
+---------
 
 After some hits have been tracked, you can start to do some queries:
 
+**Get count of unique views**
+
 ```ruby
-# Get count of unique views
 @listing.uhit_count(:views)
-
-# Get a raw count of all views ever recorded
-@listing.hit_count(:views)
-
-# Get IDs of the most viewed listings in the past 5 days.
-Listing.top(:views, days: 5)
-
-# Get IDs of the most liked listings in the past 5 days.
-Listing.top(:likes, days: 5)
-
-# Get IDs of the most liked, viewed, and shared listings with likes weighted
-# higher than views in the past 12 hours.
-Listing.top({ likes: 2, views: 1, shares: 3 }, hours: 12)
 ```
 
-## Use Boffin with anything really
+**Get a raw count of all views ever recorded**
+
+```ruby
+@listing.hit_count(:views)
+```
+
+**Get IDs of the most viewed listings in the past 5 days**
+
+```ruby
+Listing.top_ids(:views, days: 5)
+```
+
+**Get IDs of the least viewed listings (that were viewed) in the past 8 hours**
+
+```ruby
+Listing.top_ids(:views, hours: 8, order: 'asc')
+```
+
+**Get IDs and hit counts of the most liked listings in the past 5 days**
+
+```ruby
+Listing.top_ids(:likes, days: 5, counts: true)
+```
+
+**Get IDs of the most liked, viewed, and shared listings with likes weighted
+higher than views in the past 12 hours**
+
+```ruby
+Listing.top_ids({ likes: 2, views: 1, shares: 3 }, hours: 12)
+```
+
+**Get IDs and combined/weighted scores of the most liked, and viewed listings in
+the past 7 days**
+
+```ruby
+Listing.top_ids({ likes: 2, views: 1 }, hours: 12, counts: true)
+```
+
+Boffin records hits in time intervals: hours, days, and months. Each interval
+has a window of time that it is available, before it expires. These windows are
+configurable. See **Configuration** above.
+
+More
+====
+
+Not just for models
+-------------------
+
+As stated before, you can use Boffin to track anything. Maybe you'd like to
+track your friends' favourite colours:
 
 ```ruby
 @tracker = Boffin::Tracker.new(:colours, [:likes, :dislikes])
 
-@tracker.hit(:likes, 'red')
-@tracker.hit(:dislikes, 'blue')
-@tracker.hit(:likes, 'green')
-@tracker.hit(:dislikes, 'red')
-@tracker.hit(:likes, 'green')
+@tracker.hit(:likes,    'red',   ['lena'])
+@tracker.hit(:dislikes, 'blue',  ['lena'])
+@tracker.hit(:likes,    'green', ['soren'])
+@tracker.hit(:dislikes, 'red',   ['soren'])
+@tracker.hit(:likes,    'green', ['jens'])
+@tracker.hit(:dislikes, 'green', ['jens'])
 
-@tracker.top(:likes, days: 30)
-#=> ["green", "red"]
+@tracker.top(:likes, months: 1)
 ```
 
-## The Future&trade;
+Or, perhaps you'd like to clone Twitter? Using Boffin, all the work is
+essentially done for you*:
 
- * Documentation!
+```ruby
+WordsTracker = Boffin::Tracker.new(:words, [:searches, :tweets])
+
+get '/search' do
+  @tweets = Tweet.search(params[:q])
+  params[:q].split.each { |word| WordsTracker.hit(:searches, word) }
+  haml :'search/show'
+end
+
+post '/tweets' do
+  @tweet = Tweet.create(params[:tweet])
+  if @tweet.valid?
+    @tweet.words.each { WordsTracker.hit(:tweets, word) }
+    redirect to("/tweets/#{@tweet.id}")
+  else
+    haml :'tweets/form'
+  end
+end
+
+get '/trends' do
+  @words = WordsTracker.top({ tweets: 3, searches: 1 }, hours: 5)
+  haml :'trends/index'
+end
+```
+_*This is a joke._
+
+TODO
+----
+
  * Ability to hit multiple instances in one command
  * Ability to get hit-count range for an instance
- * Some nice examples with pretty things.
+ * Some nice examples with pretty things
  * ORM adapters for niceness and tighter integration
+ * Examples of how to turn IDs back into instances
  * Reporting DSL thingy
  * Web framework integration (helpers for tracking hits)
  * Ability to blend unique hits with raw hits
  * Ability to unhit an instance (if a model instance is destroyed for example)
 
-## Stuff
+FAQ
+---
 
-Boffin is tested on MRI Ruby 1.9.2
+### What's with the name?
 
-### What's with the name?!?
+Well, it means [this](http://en.wikipedia.org/wiki/Boffin). Its use in the
+context of this project is very tongue-in-cheek.
 
-It's all in [good humour](http://en.wikipedia.org/wiki/Boffin)!
-
-### Are you Brittish?
+### Are you British?
 
 No, but [this guy](http://github.com/aanand) is.
