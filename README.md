@@ -11,26 +11,20 @@ WordsTracker = Boffin.track(:words, [:searches, :tweets])
 
 post '/tweets' do
   @tweet = Tweet.create(params[:tweet])
-  params[:tweet][:body].split.each do |word|
+  @tweet.text.split.each do |word|
     WordsTracker.hit(:tweets, word, [current_user])
   end
 end
 
 post '/search' do
-  params[:q]
+  params[:q].split.each do |word|
+    WordsTracker.hit(:searches, word, [current_user, session.id])
+  end
 end
-```
 
-Provide a list of valid hit types to ensure you never misspell them:
-
-```ruby
-Boffin.track(Listing, [:views, :likes, :shares])
-```
-
-Or don't, if that's not how you roll:
-
-```ruby
-Boffin.track(Listing)
+get '/trending' do
+  @words = WordsTracker.top({ searches: 1, tweets: 2 }, hours: 8)
+end
 ```
 
 You can also use the mixin directly if that's more your style:
@@ -47,9 +41,57 @@ class Listing < Sequel::Model
 end
 ```
 
-Boffin will use whatever you give it as uniqueness, for example say you have a
-controller action that is only available if a user is logged in, then your hit
-call would look like this:
+## Hiredis
+
+If you're on OS X or Linux you'll probably want to use pietern/hiredis-rb
+because it's faster. Require Hiredis before Boffin and `redis` will use
+`hiredis` as its adapter:
+
+```ruby
+require 'hiredis'
+require 'boffin'
+```
+
+Or if you're `Bundler.require`in' it up, then somewhere in your Gemfile will
+appear:
+
+```ruby
+gem 'hiredis'
+gem 'boffin'
+```
+
+## Hit Uniqueness
+
+Boffin will use whatever you give it to identify a hit as unique, for example,
+say you have a controller action that is only available if a user is logged in,
+then your hit call might look something like this:
+
+```ruby
+class ListingsController < ApplicationController
+
+  before_filter :authenticate_user!, only: [:like]
+
+  def like
+    @listing = Listing.find(params[:id])
+    @listing.hit(:likes, [current_user])
+  end
+
+end
+```
+
+For an action that can be accessed by a non-user 
+
+```ruby
+class ListingsController < ApplicationController
+  ...
+
+  def show
+    @listing = Listing.find(params[:id])
+    @listing.hit(:views, [current_user, session[:session_id]])
+  end
+
+end
+```
 
 If the object passed in responds to `#as_member` or `#id` it will be used
 as an identifier. Otherwise `#to_s` is called and the result is used.
@@ -122,17 +164,17 @@ Listing.top({ likes: 2, views: 1, shares: 3 }, hours: 12)
 #=> ["green", "red"]
 ```
 
-## The Future&trade
+## The Future&trade;
 
  * Documentation!
  * Ability to hit multiple instances in one command
- * Ability to unhit an instance (if a model is destroyed for example.)
  * Ability to get hit-count range for an instance
  * Some nice examples with pretty things.
  * ORM adapters for niceness and tighter integration
  * Reporting DSL thingy
  * Web framework integration (helpers for tracking hits)
  * Ability to blend unique hits with raw hits
+ * Ability to unhit an instance (if a model instance is destroyed for example)
 
 ## Stuff
 
@@ -144,4 +186,4 @@ It's all in [good humour](http://en.wikipedia.org/wiki/Boffin)!
 
 ### Are you Brittish?
 
-No, but [this guy](http://github.com/aanand) is :-)
+No, but [this guy](http://github.com/aanand) is.

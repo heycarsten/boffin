@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rspec',  '~> 2.6'
   s.add_development_dependency 'timecop'
+  s.add_development_dependency 'yard'
 
   s.description = <<END
 Boffin uses Redis to track hits on Ruby objects, these can be models, or even

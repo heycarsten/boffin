@@ -20,6 +20,10 @@ module Boffin
 
   class UndefinedHitTypeError < StandardError; end
 
+  # 
+  #
+  # @param [Symbol] format the format type, `:text` or `:html`
+  # @return [String] the object converted into the expected format.
   def self.config(&block)
     @config ||= Config.new(&block)
   end
