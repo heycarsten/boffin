@@ -3,8 +3,8 @@ Boffin
 
 Hit tracking library for Ruby using [Redis](http://redis.io).
 
-Description
------------
+About
+-----
 
 Boffin is a library for tracking hits to things in your Ruby application. Things
 can be IDs of records in a database, strings representing tags or topics, URLs

@@ -20,9 +20,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'timecop'
 
   s.description = <<-END
-Boffin uses Redis to track hits on Ruby objects, these can be models, or even
-just strings. You can then query for top objects based on hit type, or you can
-combine hits together and even apply weights to favour a certain type of hit
-over other types.
+Boffin is a library for tracking hits to things in your Ruby application. Things
+can be IDs of records in a database, strings representing tags or topics, URLs
+of webpages, names of places, whatever you desire. Boffin is able to provide
+lists of those things based on most hits, least hits, it can even report on
+weighted combinations of different types of hits.
   END
 end
