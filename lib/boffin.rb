@@ -18,6 +18,7 @@ module Boffin
     months: '%Y-%m' }
   INTERVAL_TYPES = INTERVAL_FORMATS.keys
 
+  # Raised when 
   class UndefinedHitTypeError < StandardError; end
 
   # 
