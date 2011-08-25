@@ -26,6 +26,11 @@ describe Boffin::Config do
       conf = Boffin::Config.new { |c| c.namespace = 'hihi' }
       conf.namespace.should == 'hihi'
     end
+
+    it 'can be sent a hash' do
+      conf = Boffin::Config.new(namespace: 'hello')
+      conf.namespace.should == 'hello'
+    end
   end
 
   describe '#merge' do
@@ -55,6 +60,6 @@ describe Boffin::Config do
   end
 
   describe '#cache_expire_secs' do
-    specify { subject.cache_expire_secs.should == 1800 } # 30 minutes
+    specify { subject.cache_expire_secs.should == 900 } # 15 minutes
   end
 end

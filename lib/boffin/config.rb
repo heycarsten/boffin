@@ -10,15 +10,20 @@ module Boffin
       :months_window_secs,
       :cache_expire_secs
 
-    def initialize(&block)
+    def initialize(opts = {}, &block)
       yield(self) if block_given?
+      update(opts)
       self
     end
 
-    def merge(updates = {})
-      dup.tap do |conf|
+    def update(updates = {})
+      tap do |conf|
         updates.each_pair { |k, v| conf.send(:"#{k}=", v) }
       end
+    end
+
+    def merge(updates = {})
+      dup.update(updates)
     end
 
     def redis
@@ -27,7 +32,7 @@ module Boffin
 
     def namespace
       @namespace ||= begin
-        if (env = ENV['BOFF_ENV'] || ENV['RACK_ENV'] || ENV['RAILS_ENV'])
+        if (env = ENV['RACK_ENV'] || ENV['RAILS_ENV'])
           "boffin:#{env}"
         else
           "boffin"
@@ -48,7 +53,7 @@ module Boffin
     end
 
     def cache_expire_secs
-      @cache_expire_secs ||= 1800 # 30 minutes
+      @cache_expire_secs ||= 15 * 60 # 15 minutes
     end
 
   end
