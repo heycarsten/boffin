@@ -1,6 +1,5 @@
 -m markdown
 --markup-provider redcarpet
---no-private
 --hide-void-return
 --no-cache
 -
