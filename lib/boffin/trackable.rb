@@ -17,10 +17,12 @@ module Boffin
   # See {file:README} for more examples.
   module Trackable
 
+    # @private
     def self.included(mod)
       mod.extend(ClassMethods)
     end
 
+    # Included as class methods in the host class
     module ClassMethods
       # @return [Tracker] The Tracker instance associated with the class
       def boffin

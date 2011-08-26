@@ -2,9 +2,16 @@ module Boffin
   # A collection of utility methods that are used throughout the library
   module Utils
 
+    # The number of seconds in an hour
     SECONDS_IN_HOUR  = 3600
+
+    # Number of seconds in a day
     SECONDS_IN_DAY   = 24 * SECONDS_IN_HOUR
+
+    # Number of seconds in a month
     SECONDS_IN_MONTH = 30 * SECONDS_IN_DAY
+
+    # Number of seconds for a single value of each unit
     SECONDS_IN_UNIT  = {
       hours:  SECONDS_IN_HOUR,
       days:   SECONDS_IN_DAY,
@@ -121,7 +128,10 @@ module Boffin
     # @param [#as_member, #id, #to_s] obj
     # @param [Hash] opts
     # @option opts [true, false] :namespace
+    #   If `true` the generated value will be prefixed with a namespace
     # @option opts [true, false] :encode
+    #   If `true` and object fails to respond to `#as_member` or `#id`, the
+    #   generated value will be Base64 encoded.
     # @return [String]
     def object_as_identifier(obj, opts = {})
       if obj.respond_to?(:as_member) || obj.respond_to?(:id)

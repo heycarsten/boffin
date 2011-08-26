@@ -18,11 +18,17 @@ require 'boffin/trackable'
 #
 # Refer to the {file:README} for further information and examples.
 module Boffin
+  # The member to use when no session identifier is available for unique hit
+  # tracking
   NIL_SESSION_MEMBER = 'boffin:nilsession'
+
+  # The way Time should be formatted for each interval type
   INTERVAL_FORMATS = {
     hours:  '%F-%H',
     days:   '%F',
     months: '%Y-%m' }
+
+  # Different interval types
   INTERVAL_TYPES = INTERVAL_FORMATS.keys
 
   # Raised by Tracker when hit types are passed to it that are not included in
