@@ -167,16 +167,16 @@ Reporting
 
 After some hits have been tracked, you can start to do some queries:
 
-**Get count of unique views**
-
-```ruby
-@listing.uhit_count(:views)
-```
-
-**Get a raw count of all views ever recorded**
+**Get a count of all views for an instance**
 
 ```ruby
 @listing.hit_count(:views)
+```
+
+**Get count of unique views for an instance**
+
+```ruby
+@listing.uhit_count(:views)
 ```
 
 **Get IDs of the most viewed listings in the past 5 days**
@@ -291,4 +291,4 @@ context of this project is very tongue-in-cheek.
 
 ### Are you British?
 
-No, but [this guy](http://github.com/aanand) is.
+No, I'm weird, but [this guy](http://github.com/aanand) is.
