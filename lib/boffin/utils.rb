@@ -69,34 +69,27 @@ module Boffin
       end
     end
 
-    def object_as_session_identifier(obj)
-      case
-      when obj.respond_to?(:id)
-        "#{underscore(obj.class)}:#{obj.id}"
-      when obj.respond_to?(:as_member)
-        "#{underscore(obj.class)}:#{obj.as_member}"
+    def object_as_identifier(obj, opts = {})
+      if obj.respond_to?(:as_member) || obj.respond_to?(:id)
+        ''.tap do |s|
+          s << "#{underscore(obj.class)}:" if opts[:namespace]
+          s << (obj.respond_to?(:as_member) ? obj.as_member : obj.id).to_s
+        end
       else
-        obj.to_s
+        opts[:encode] ? Base64.strict_encode64(obj.to_s) : obj.to_s
       end
     end
 
     def object_as_member(obj)
-      case
-      when obj.respond_to?(:id)
-        obj.id.to_s
-      when obj.respond_to?(:as_member)
-        obj.as_member.to_s
-      else
-        obj.to_s
-      end
+      object_as_identifier(obj)
+    end
+
+    def object_as_session_identifier(obj)
+      object_as_identifier(obj, namespace: true)
     end
 
     def object_as_key(obj)
-      if obj.respond_to?(:id)
-        obj.id.to_s
-      else
-        Base64.strict_encode64(obj.to_s)
-      end
+      object_as_identifier(obj, encode: true)
     end
 
   end
