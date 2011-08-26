@@ -1,6 +1,20 @@
 module Boffin
+  # Represents a Hit instance, immutable once created. Interacting with Hit
+  # directly is not necessary.
   class Hit
 
+    # Creates a new Hit instance
+    #
+    # @param [Tracker] tracker
+    #   Tracker that is issuing the hit
+    # @param [Symbol] type
+    #   Hit type identifier
+    # @param [Object] instance
+    #   The instance that is being hit, any object that responds to
+    #   `#to_member`, `#id`, or `#to_s`
+    # @param [Array] uniquenesses
+    #   An array of which the first object is used to generate a session
+    #   identifier for hit uniqueness
     def initialize(tracker, type, instance, uniquenesses = [])
       @now      = Time.now
       @sessid   = Utils.uniquenesses_as_session_identifier(uniquenesses)
