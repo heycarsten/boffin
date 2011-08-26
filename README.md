@@ -103,6 +103,14 @@ class Listing < Sequel::Model
 end
 ```
 
+**_or_**
+
+```ruby
+class Listing < Sequel::Model
+  Boffin.track(self, [:likes, :shares, :views])
+end
+```
+
 Now to track hits on instances of the Listing model, simply:
 
 ```ruby
