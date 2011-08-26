@@ -1,18 +1,31 @@
 module Boffin
+  # Responsible for generating keys to store hit data in Redis.
   class Keyspace
 
     attr_reader :config
 
+    # @param [Tracker] tracker
+    #   The Tracker that is using this Keyspace
+    # @param [Boolean] is_uniq
+    #   If specified all keys will include .uniq after the root portion. Used
+    #   for easily scoping data for tracking unique hits.
     def initialize(tracker, is_uniq = false)
       @config = tracker.config
       @ns     = tracker.namespace
       @uniq   = is_uniq ? true : false
     end
 
+    # @return [true, false]
+    #   `true` if this keyspace is scoped for unique data
     def unique_namespace?
       @uniq
     end
 
+    # @param [Object] instance
+    #   Object that will be used to prefix the key namespace this is used for
+    #   keys that deal with object instances. (See {Utils#object_as_key})
+    # @return [String]
+    #   Returns the root portion of a key
     def root(instance = nil)
       slug = instance ? Utils.object_as_key(instance) : nil
       "#{@config.namespace}:#{@ns}".tap { |s|

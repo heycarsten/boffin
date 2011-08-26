@@ -1,6 +1,6 @@
 module Boffin
-  # Represents a Hit instance, immutable once created. Interacting with Hit
-  # directly is not necessary.
+  # Represents a Hit instance, immutable once created. Interacting with and
+  # instantiating Hit directly is not necessary.
   class Hit
 
     # Creates a new Hit instance
