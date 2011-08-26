@@ -34,7 +34,7 @@ module Boffin
         s << ":uniq"    if @uniq }
     end
 
-    # @param [Array <Symbol>, Symbol] types
+    # @param [Array<Symbol>, Symbol] types
     #   An array of hit types `[:views, :likes]`, or a singular hit type
     #   `:views`
     # @param [Object] instance
@@ -49,7 +49,7 @@ module Boffin
 
     # Calculates the hit root and postfixes it with ":hits", this key is used
     # for a sorted set that stores unique hit count data.
-    # @param [Array <Symbol>, Symbol] types
+    # @param [Array<Symbol>, Symbol] types
     # @param [Object] instance
     # @return [String]
     # @see #hits_root
@@ -59,7 +59,7 @@ module Boffin
 
     # Calculates the hit root and postfixes it with ":hit_count", this key is
     # used to store a count of total hits ever made.
-    # @param [Array <Symbol>, Symbol] types
+    # @param [Array<Symbol>, Symbol] types
     # @param [Object] instance
     # @return [String]
     # @see #hits_root
@@ -70,7 +70,7 @@ module Boffin
     # Returns a key that is used for storing the result set of a union for the
     # provided window of time. Calls {#hits}, and then appends
     # `:current.<unit>_<size>`
-    # @param [Array <Symbol>, Symbol] types
+    # @param [Array<Symbol>, Symbol] types
     # @param [Symbol] unit
     #   The time interval: `:hours`, `:days`, or `:months`
     # @param [Fixnum] size
@@ -121,7 +121,7 @@ module Boffin
     #   The window size of the specified time interval being calculated
     # @param [Time, Date] starting_at
     #   The time at which to start counting back from
-    # @return [Array <String>]
+    # @return [Array<String>]
     #   An array of keys for the range of intervals
     # @see #hits_time_window
     # @see Utils#time_ago_range
