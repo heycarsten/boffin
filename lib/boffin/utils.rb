@@ -13,7 +13,7 @@ module Boffin
 
     module_function
 
-    # @param [Object #to_s] thing
+    # @param [#to_s] thing
     #   A Module, Class, String, or anything in which the underscored value of
     #   `#to_s` is desirable.
     # @return [String]
@@ -58,22 +58,29 @@ module Boffin
       end
     end
 
-    # Returns a time in the past by a specified offset
     # @example
     #   time_ago(Time.local(2011, 1, 3), days: 2)
-    #   #=> 2011-01-01 00:00:00
+    #   # => 2011-01-01 00:00:00
     # @param [Time] time
     #   The initial time that the offset will be calculated from
     # @param [Hash] unit
-    #   (see #extract_time_unit)
+    #   (see {#extract_time_unit})
     # @return [Time]
-    #   The time in the past
+    #   The time in the past offset by the specified amount
     def time_ago(time, unit)
       unit, unit_value = *extract_time_unit(unit)
       time - (unit_value * SECONDS_IN_UNIT[unit])
     end
 
-    # @return [Array <Time>]
+    # @param [Time] upto
+    #   The base time of which to calculate the range from
+    # @param [Hash] unit
+    #   (see {#extract_time_unit})
+    # @return [Array<Time>]
+    #   An array of times in the calculated range
+    # @example
+    #   time_ago_range(Time.local(2011, 1, 5), days: 3)
+    #   # => [2011-01-03 00:00:00, 2011-01-04 00:00:00, 2011-01-05 00:00:00]
     def time_ago_range(upto, unit)
       unit, size = *extract_time_unit(unit)
       ago = time_ago(upto, unit => (size - 1))
@@ -84,6 +91,13 @@ module Boffin
       times
     end
 
+    # Generates a set member based off the first object in the provided array
+    # that is not `nil`. If the array is empty or only contains `nil` elements
+    # then {Boffin::NIL_SESSION_MEMBER} is returned.
+    # @param [Array] aspects
+    #   An array of which the first non-nil element is passed to
+    #   {#object_as_session_identifier}
+    # @return [String]
     def uniquenesses_as_session_identifier(aspects)
       if (obj = aspects.flatten.reject { |u| blank?(u) }.first)
         object_as_session_identifier(obj)
@@ -92,6 +106,9 @@ module Boffin
       end
     end
 
+    # @param [String, Symbol, Object] obj
+    # @return [String]
+    #   Returns a string that can be used as a namespace in Redis keys
     def object_as_namespace(obj)
       case obj
       when String, Symbol
@@ -101,6 +118,11 @@ module Boffin
       end
     end
 
+    # @param [#as_member, #id, #to_s] obj
+    # @param [Hash] opts
+    # @option opts [true, false] :namespace
+    # @option opts [true, false] :encode
+    # @return [String]
     def object_as_identifier(obj, opts = {})
       if obj.respond_to?(:as_member) || obj.respond_to?(:id)
         ''.tap do |s|
@@ -112,14 +134,25 @@ module Boffin
       end
     end
 
+    # @return [String]
+    # @param [#as_member, #id, #to_s] obj
+    # @return [String] A string that can be used as a member in
+    #   {Keyspace#hits_time_window}.
+    # @see #object_as_identifier
     def object_as_member(obj)
       object_as_identifier(obj)
     end
 
+    # @param [#as_member, #id, #to_s] obj
+    # @return [String] A string that can be used as a member in {Keyspace#hits}.
+    # @see #object_as_identifier
     def object_as_session_identifier(obj)
       object_as_identifier(obj, namespace: true)
     end
 
+    # @param [#as_member, #id, #to_s] obj
+    # @return [String] A string that can be used as part of a Redis key
+    # @see #object_as_identifier
     def object_as_key(obj)
       object_as_identifier(obj, encode: true)
     end
