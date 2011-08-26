@@ -286,9 +286,9 @@ FAQ
 
 ### What's with the name?
 
-Well, it means [this](http://en.wikipedia.org/wiki/Boffin). Its use in the
-context of this project is very tongue-in-cheek.
+Well, it means [this](http://en.wikipedia.org/wiki/Boffin). For the purposes of
+this project, its use is very tongue-in-cheek.
 
 ### Are you British?
 
-No, I'm weird, but [this guy](http://github.com/aanand) is.
+No, I'm just weird, but [this guy](http://github.com/aanand) is a real British person.
