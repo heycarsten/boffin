@@ -36,8 +36,9 @@ class MockTrackableIncluded < MockDitty
   boffin.hit_types = [:views, :likes]
 end
 
-class MockTrackableInjected < MockDitty; end
-Boffin.track(MockTrackableInjected, [:views, :likes])
+class MockTrackableInjected < MockDitty
+  Boffin.track(self, [:views, :likes])
+end
 
 module SpecHelper
   module_function
