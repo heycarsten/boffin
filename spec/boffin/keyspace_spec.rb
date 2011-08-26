@@ -10,6 +10,7 @@ describe Boffin::Keyspace do
 
   describe '#root' do
     specify { @ks.root.should == 'b:mock_ditty' }
+    specify { @uks.root.should == 'b:mock_ditty:uniq' }
   end
 
   describe '#hits' do
