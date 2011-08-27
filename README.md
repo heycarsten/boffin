@@ -15,6 +15,7 @@ weighted combinations of different types of hits.
 Resources
 ---------
 
+ * [Documentation](http://rubydoc.info/github/heycarsten/boffin/master/frames)
  * [Source Code](https://github.com/heycarsten/boffin)
  * [Issue Tracker](https://github.com/heycarsten/boffin/issues)
  * [Test Suite](https://github.com/heycarsten/boffin/tree/master/spec)
