@@ -152,7 +152,7 @@ module Boffin
           s << (obj.respond_to?(:as_member) ? obj.as_member : obj.id).to_s
         end
       else
-        opts[:encode] ? Base64.strict_encode64(obj.to_s) : obj.to_s
+        opts[:encode] ? [obj.to_s].pack("m0").chomp : obj.to_s
       end
     end
 

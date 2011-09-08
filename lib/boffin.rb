@@ -1,4 +1,3 @@
-require 'base64'
 require 'date'
 require 'time'
 require 'redis'
