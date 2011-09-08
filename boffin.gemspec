@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency             'redis',   '>= 2.2'
   s.add_development_dependency 'rspec',   '~> 2.6'
   s.add_development_dependency 'timecop'
+  s.add_development_dependency 'bundler', '~> 1.0.14'
 
   s.description = <<-END
 Boffin is a library for tracking hits to things in your Ruby application. Things
