@@ -91,6 +91,8 @@ module Boffin
     #   Perform union for hit counts over the last _n_ months.
     # @example Return IDs of most viewed and liked listings in the past 6 days with scores
     #   @tracker.top({ views: 1, likes: 1 }, counts: true, days: 6)
+    # @example Return IDS of most viewed and liked listings in the past 6 days with scores (Alternate syntax)
+    #   @tracker.top([[:views, 1], [:likes, 1]], counts: true, days: 6)
     # @example Return IDs of most viewed listings in the past 12 hours
     #   @tracker.top(:views, hours: 12)
     # @note
