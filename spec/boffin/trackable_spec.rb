@@ -21,7 +21,7 @@ describe Boffin::Trackable do
   end
 
   it 'delegates ::top_ids to the Tracker instance' do
-    MockTrackableInjected.top_ids(:views, days: 1).should == ['1']
+    MockTrackableInjected.top_ids(:views, :days => 1).should == ['1']
   end
 
   it 'delegates #hit_count to the Tracker instance' do

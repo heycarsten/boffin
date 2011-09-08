@@ -13,9 +13,9 @@ module Boffin
 
     # Number of seconds for a single value of each unit
     SECONDS_IN_UNIT  = {
-      hours:  SECONDS_IN_HOUR,
-      days:   SECONDS_IN_DAY,
-      months: SECONDS_IN_MONTH
+      :hours  => SECONDS_IN_HOUR,
+      :days   => SECONDS_IN_DAY,
+      :months => SECONDS_IN_MONTH
     }
 
     module_function
@@ -157,14 +157,14 @@ module Boffin
     # @return [String] A string that can be used as a member in {Keyspace#hits}.
     # @see #object_as_identifier
     def object_as_session_identifier(obj)
-      object_as_identifier(obj, namespace: true)
+      object_as_identifier(obj, :namespace => true)
     end
 
     # @param [#as_member, #id, #to_s] obj
     # @return [String] A string that can be used as part of a Redis key
     # @see #object_as_identifier
     def object_as_key(obj)
-      object_as_identifier(obj, encode: true)
+      object_as_identifier(obj, :encode => true)
     end
 
   end

@@ -6,7 +6,7 @@ require 'timecop'
 
 $redis = if ENV['DEBUG']
   require 'logger'
-  Redis.connect(logger: Logger.new(STDERR))
+  Redis.connect(:logger => Logger.new(STDERR))
 else
   Redis.connect
 end

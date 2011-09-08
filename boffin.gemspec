@@ -11,8 +11,8 @@ Gem::Specification.new do |s|
   s.summary           = 'Hit tracking library for Ruby using Redis'
   s.has_rdoc          = 'yard'
   s.rubyforge_project = 'boffin'
-  s.files             = `git ls-files`.split(?\n)
-  s.test_files        = `git ls-files -- spec/*`.split(?\n)
+  s.files             = `git ls-files`.split(/\n/)
+  s.test_files        = `git ls-files -- spec/*`.split(/\n/)
   s.require_paths     = ['lib']
 
   s.add_dependency             'redis',   '>= 2.2'

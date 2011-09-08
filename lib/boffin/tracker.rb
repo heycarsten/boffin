@@ -178,7 +178,7 @@ module Boffin
       weights.keys.each { |t| union(ks, t, unit, size, opts) }
       keys = weights.keys.map { |t| ks.hits_union(t, unit, size) }
       zfetch(ks.hits_union_multi(weights, unit, size), keys, {
-        weights: weights.values
+        :weights => weights.values
       }.merge(opts))
     end
 
@@ -194,8 +194,8 @@ module Boffin
     # @see #zrange
     def zfetch(storkey, keys, opts = {})
       zrangeopts = {
-        counts: opts.delete(:counts),
-        order:  (opts.delete(:order) || :desc).to_sym }
+        :counts => opts.delete(:counts),
+        :order  => (opts.delete(:order) || :desc).to_sym }
       if redis.zcard(storkey) == 0
         redis.zunionstore(storkey, keys, opts)
         redis.expire(storkey, @config.cache_expire_secs)
@@ -213,7 +213,7 @@ module Boffin
     #   option is `true` it returns an array of pairs where the first value is
     #   the member, and the second value is the member's score.
     def zrange(key, opts)
-      args = [key, 0, -1, opts[:counts] ? { withscores: true } : {}]
+      args = [key, 0, -1, opts[:counts] ? { :withscores => true } : {}]
       result = case opts[:order]
         when :asc  then redis.zrange(*args)
         when :desc then redis.zrevrange(*args)
