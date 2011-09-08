@@ -42,7 +42,13 @@ describe Boffin::Keyspace do
 
   describe '#hits_union_multi' do
     specify do
-      @ks.hits_union_multi({ :views => 1, :likes => 3 }, :days, 5).
+      weighted_hit_types =
+        if RUBY_VERSION < '1.9'
+          [[:views, 1], [:likes, 3]]
+        else
+          { :views => 1, :likes => 3 }
+        end
+      @ks.hits_union_multi(weighted_hit_types, :days, 5).
         should == 'b:mock_ditty:views_1_likes_3:hits:current.days_5'
     end
   end
