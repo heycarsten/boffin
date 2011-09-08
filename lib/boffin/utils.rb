@@ -13,9 +13,9 @@ module Boffin
 
     # Number of seconds for a single value of each unit
     SECONDS_IN_UNIT  = {
-      hours:  SECONDS_IN_HOUR,
-      days:   SECONDS_IN_DAY,
-      months: SECONDS_IN_MONTH
+      :hours  => SECONDS_IN_HOUR,
+      :days   => SECONDS_IN_DAY,
+      :months => SECONDS_IN_MONTH
     }
 
     module_function
@@ -43,6 +43,18 @@ module Boffin
     #   `[]`, `{}`, `nil`, `false`, `''`.
     def blank?(obj)
       obj.respond_to?(:empty?) ? obj.empty? : !obj
+    end
+
+    # @param [Object] obj any Ruby object
+    # @return [true, false]
+    #   `true` if the provided object responds to :id, other than it's
+    #   internal object identifier
+    #   `false` if the object does not respond to :id
+    def respond_to_id?(obj)
+      # NOTE: this feels like a hack. I'm sure there is a more elegant way
+      # to determine whether the :id method is the built in Object#id but
+      # I can't think of it
+      obj.respond_to?(:id) and obj.id != obj.object_id
     end
 
     # Pulls time interval information from a hash of options.
@@ -134,13 +146,13 @@ module Boffin
     #   generated value will be Base64 encoded.
     # @return [String]
     def object_as_identifier(obj, opts = {})
-      if obj.respond_to?(:as_member) || obj.respond_to?(:id)
+      if obj.respond_to?(:as_member) || respond_to_id?(obj)
         ''.tap do |s|
           s << "#{underscore(obj.class)}:" if opts[:namespace]
           s << (obj.respond_to?(:as_member) ? obj.as_member : obj.id).to_s
         end
       else
-        opts[:encode] ? Base64.strict_encode64(obj.to_s) : obj.to_s
+        opts[:encode] ? [obj.to_s].pack("m0").chomp : obj.to_s
       end
     end
 
@@ -157,14 +169,14 @@ module Boffin
     # @return [String] A string that can be used as a member in {Keyspace#hits}.
     # @see #object_as_identifier
     def object_as_session_identifier(obj)
-      object_as_identifier(obj, namespace: true)
+      object_as_identifier(obj, :namespace => true)
     end
 
     # @param [#as_member, #id, #to_s] obj
     # @return [String] A string that can be used as part of a Redis key
     # @see #object_as_identifier
     def object_as_key(obj)
-      object_as_identifier(obj, encode: true)
+      object_as_identifier(obj, :encode => true)
     end
 
   end

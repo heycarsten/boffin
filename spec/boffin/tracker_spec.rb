@@ -55,14 +55,14 @@ describe Boffin::Tracker do
 
   describe '#hit' do
     it 'throws an error if the hit type is not in the list' do
-      -> { @tracker.hit(:view, @instance1) }.
+      lambda  { @tracker.hit(:view, @instance1) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
   end
 
   describe '#hit_count' do
     it 'throws an error if the hit type is not in the list' do
-      -> { @tracker.hit_count(:view, @instance1) }.
+      lambda  { @tracker.hit_count(:view, @instance1) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
@@ -77,7 +77,7 @@ describe Boffin::Tracker do
 
   describe '#uhit_count' do
     it 'throws an error if the hit type is not in the list' do
-      -> { @tracker.uhit_count(:view, @instance1) }.
+      lambda  { @tracker.uhit_count(:view, @instance1) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
@@ -92,7 +92,7 @@ describe Boffin::Tracker do
 
   describe '#hit_count_for_session_id' do
     it 'throws an error if the hit type is not in the list' do
-      -> { @tracker.hit_count_for_session_id(:view, @instance1, 'sess.1') }.
+      lambda  { @tracker.hit_count_for_session_id(:view, @instance1, 'sess.1') }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
@@ -107,32 +107,32 @@ describe Boffin::Tracker do
 
   describe '#top' do
     it 'throws an error if passed hit type is invalid' do
-      -> { @tracker.top(:view, days: 3) }.
+      lambda  { @tracker.top(:view, :days => 3) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
     it 'throws an error if passed weights with hit type that is invalid' do
-      -> { @tracker.top({ view: 1 }, days: 3) }.
+      lambda  { @tracker.top({ :view => 1 }, :days => 3) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
     it 'returns ids ordered by hit counts of weighted totals' do
-      ids = @tracker.top({ views: 1, likes: 2 }, days: 3)
+      ids = @tracker.top({ :views => 1, :likes => 2 }, :days => 3)
       ids.should == ['300', '200', '100']
     end
 
     it 'returns ids ordered by total counts of a specific hit type' do
-      ids = @tracker.top(:views, days: 3)
+      ids = @tracker.top(:views, :days => 3)
       ids.should == ['300', '100', '200']
     end
 
     it 'returns ids in ascending order when passed { order: "asc" } as an option' do
-      ids = @tracker.top(:views, days: 3, order: 'asc')
+      ids = @tracker.top(:views, :days => 3, :order => 'asc')
       ids.should == ['200', '100', '300']
     end
 
     it 'returns ids and counts when passed { counts: true } as an option' do
-      ids = @tracker.top(:views, days: 3, counts: true)
+      ids = @tracker.top(:views, :days => 3, :counts => true)
       ids.should == [
         ['300', 12],
         ['100', 8],
@@ -141,7 +141,7 @@ describe Boffin::Tracker do
     end
 
     it 'returns ids based on unique hit data when passed { unique: true } as an option' do
-      ids = @tracker.top(:views, days: 3, counts: true, unique: true)
+      ids = @tracker.top(:views, :days => 3, :counts => true, :unique => true)
       ids.should == [
         ['300', 7],
         ['200', 5],

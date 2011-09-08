@@ -28,14 +28,14 @@ describe Boffin::Config do
     end
 
     it 'can be sent a hash' do
-      conf = Boffin::Config.new(namespace: 'hello')
+      conf = Boffin::Config.new(:namespace => 'hello')
       conf.namespace.should == 'hello'
     end
   end
 
   describe '#merge' do
     it 'copies the existing instance' do
-      newconf = subject.merge(namespace: 'carsten')
+      newconf = subject.merge(:namespace => 'carsten')
       newconf.namespace.should == 'carsten'
       subject.namespace.should == 'boffin'
     end

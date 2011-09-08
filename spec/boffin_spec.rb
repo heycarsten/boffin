@@ -32,7 +32,7 @@ describe Boffin do
     end
 
     it 'accepts a hash' do
-      Boffin.config(namespace: 'trendy')
+      Boffin.config(:namespace => 'trendy')
       Boffin.config.namespace.should == 'trendy'
     end
 

@@ -16,9 +16,9 @@ describe Boffin::Hit, '::new' do
   it 'stores hit data under the appropriate keys' do
     Boffin::Hit.new(@tracker, :tests, @ditty, [nil, @user])
     [:hours, :days, :months].each do |interval|
-      @tracker.top(:tests, interval => 1, counts: true).
+      @tracker.top(:tests, interval => 1, :counts => true).
         should == [['1', 1]]
-      @tracker.top(:tests, interval => 1, counts: true, unique: true).
+      @tracker.top(:tests, interval => 1, :counts => true, :unique => true).
         should == [['1', 1]]
     end
     @tracker.hit_count(:tests, @ditty).should == 1
@@ -29,9 +29,9 @@ describe Boffin::Hit, '::new' do
     Boffin::Hit.new(@tracker, :tests, @ditty, [nil, @user])
     Boffin::Hit.new(@tracker, :tests, @ditty, [nil, @user])
     [:hours, :days, :months].each do |interval|
-      @tracker.top(:tests, interval => 1, counts: true).
+      @tracker.top(:tests, interval => 1, :counts => true).
         should == [['1', 2]]
-      @tracker.top(:tests, interval => 1, counts: true, unique: true).
+      @tracker.top(:tests, interval => 1, :counts => true, :unique => true).
         should == [['1', 1]]
     end
     @tracker.hit_count_for_session_id(:tests, @ditty, @user).should == 2

@@ -1,4 +1,3 @@
-require 'base64'
 require 'date'
 require 'time'
 require 'redis'
@@ -24,9 +23,9 @@ module Boffin
 
   # The way Time should be formatted for each interval type
   INTERVAL_FORMATS = {
-    hours:  '%F-%H',
-    days:   '%F',
-    months: '%Y-%m' }
+    :hours  => '%F-%H',
+    :days   => '%F',
+    :months => '%Y-%m' }
 
   # Different interval types
   INTERVAL_TYPES = INTERVAL_FORMATS.keys
