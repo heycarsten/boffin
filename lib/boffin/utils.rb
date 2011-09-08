@@ -45,6 +45,18 @@ module Boffin
       obj.respond_to?(:empty?) ? obj.empty? : !obj
     end
 
+    # @param [Object] obj any Ruby object
+    # @return [true, false]
+    #   `true` if the provided object responds to :id, other than it's
+    #   internal object identifier
+    #   `false` if the object does not respond to :id
+    def respond_to_id?(obj)
+      # NOTE: this feels like a hack. I'm sure there is a more elegant way
+      # to determine whether the :id method is the built in Object#id but
+      # I can't think of it
+      obj.respond_to?(:id) and obj.id != obj.object_id
+    end
+
     # Pulls time interval information from a hash of options.
     # @example
     #   extract_time_unit(this: 'is ignored', days: 6, so_is: 'this')
@@ -134,7 +146,7 @@ module Boffin
     #   generated value will be Base64 encoded.
     # @return [String]
     def object_as_identifier(obj, opts = {})
-      if obj.respond_to?(:as_member) || obj.respond_to?(:id)
+      if obj.respond_to?(:as_member) || respond_to_id?(obj)
         ''.tap do |s|
           s << "#{underscore(obj.class)}:" if opts[:namespace]
           s << (obj.respond_to?(:as_member) ? obj.as_member : obj.id).to_s
