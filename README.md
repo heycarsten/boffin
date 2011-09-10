@@ -128,7 +128,7 @@ identify hits from particular users or sessions:
 ```ruby
 get '/listings/:id' do
   @listing = Listing[params[:id]]
-  @listing.hit(:views, [current_user, session[:id]])
+  @listing.hit(:views, unique: [current_user, session[:id]])
   haml :'listings/show'
 end
 ```
@@ -144,7 +144,7 @@ we want to hit an instance, so let's create a helper:
 ```ruby
 helpers do
   def hit(trackable, type)
-    trackable.hit(type, [current_user, session[:id]])
+    trackable.hit(type, unique: [current_user, session[:id]])
   end
 end
 ```
@@ -156,7 +156,7 @@ applicable to a Rails application as well:
 class ApplicationController < ActionController::Base
   protected
   def hit(trackable, type)
-    trackable.hit(type, [current_user, session[:session_id]])
+    trackable.hit(type, unique: [current_user, session[:session_id]])
   end
 end
 ```
