@@ -4,8 +4,8 @@ describe Boffin::Trackable do
   before :all do
     SpecHelper.flush_keyspace!
     @mock = MockTrackableInjected.new(1)
-    @mock.hit(:views, ['sess.1'])
-    @mock.hit(:views, ['sess.1'])
+    @mock.hit(:views, :unique => ['sess.1'])
+    @mock.hit(:views, :unique => ['sess.1'])
   end
 
   it 'can be included' do

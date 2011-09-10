@@ -14,7 +14,7 @@ describe Boffin::Hit, '::new' do
   end
 
   it 'stores hit data under the appropriate keys' do
-    Boffin::Hit.new(@tracker, :tests, @ditty, [nil, @user])
+    Boffin::Hit.new(@tracker, :tests, @ditty, :unique => [nil, @user])
     [:hours, :days, :months].each do |interval|
       @tracker.top(:tests, interval => 1, :counts => true).
         should == [['1', 1]]
@@ -26,8 +26,8 @@ describe Boffin::Hit, '::new' do
   end
 
   it 'does not store data under unique keys if the hit is not unique' do
-    Boffin::Hit.new(@tracker, :tests, @ditty, [nil, @user])
-    Boffin::Hit.new(@tracker, :tests, @ditty, [nil, @user])
+    Boffin::Hit.new(@tracker, :tests, @ditty, :unique => [nil, @user])
+    Boffin::Hit.new(@tracker, :tests, @ditty, :unique => [nil, @user])
     [:hours, :days, :months].each do |interval|
       @tracker.top(:tests, interval => 1, :counts => true).
         should == [['1', 2]]
