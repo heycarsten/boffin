@@ -27,7 +27,7 @@ describe Boffin::Tracker do
       @tracker.hit(:views, @instance3, ['sess.1'])
       @tracker.hit(:views, @instance3)
       @tracker.hit(:likes, @instance3, [@user1])
-      @tracker.hit(:views, @instance3, ['sess.1'])
+      @tracker.hit(:views, @instance3, :unique => ['sess.1'], :increment => 2)
     end
 
     Timecop.freeze(@date - 1) do
@@ -134,7 +134,7 @@ describe Boffin::Tracker do
     it 'returns ids and counts when passed { counts: true } as an option' do
       ids = @tracker.top(:views, :days => 3, :counts => true)
       ids.should == [
-        ['300', 12],
+        ['300', 13],
         ['100', 8],
         ['200', 7]
       ]

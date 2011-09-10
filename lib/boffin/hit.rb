@@ -12,10 +12,21 @@ module Boffin
     # @param [Object] instance
     #   The instance that is being hit, any object that responds to
     #   `#to_member`, `#id`, or `#to_s`
-    # @param [Array] uniquenesses
-    #   An array of which the first object is used to generate a session
-    #   identifier for hit uniqueness
-    def initialize(tracker, type, instance, uniquenesses = [])
+    # @param [Hash] options
+    # @option options [Array] :unique ([]) An array of which the first
+    #   object is used to generate a session identifier for hit uniqueness
+    # @option options [Fixnum] :increment (1) The hit increment
+    def initialize(tracker, type, instance, options={})
+      if options.is_a? Array
+        warn "This constructor is deprecated and will soon be unavailable\n" \
+             "please create Hits with: \n" \
+             "Hit.new(@tracker, :type, @instance, :unique => [1,2,3,4])\n"
+        uniquenesses = options
+        @increment   = 1
+      else
+        uniquenesses = options.delete(:unique) || []
+        @increment   = options.delete(:increment) || 1
+      end
       @now      = Time.now
       @sessid   = Utils.uniquenesses_as_session_identifier(uniquenesses)
       @type     = type
@@ -54,7 +65,7 @@ module Boffin
     #   `true` if this hit is unique, `false` if it has been made before by the
     #   same session identifer.
     def track_hit
-      redis.incr(keyspace.hit_count(@type, @instance))
+      redis.incrby(keyspace.hit_count(@type, @instance), @increment)
       redis.zincrby(keyspace.hits(@type, @instance), 1, @sessid) == '1'
     end
 
@@ -75,7 +86,7 @@ module Boffin
     #   Changes keyspace scope to keys under .uniq
     def set_window_interval(interval, uniq = false)
       key = keyspace(uniq).hits_time_window(@type, interval, @now)
-      redis.zincrby(key, 1, @member)
+      redis.zincrby(key, @increment, @member)
       redis.expire(key, @tracker.config.send("#{interval}_window_secs"))
     end
 

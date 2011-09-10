@@ -39,4 +39,14 @@ describe Boffin::Hit, '::new' do
     @tracker.uhit_count(:tests, @ditty).should == 1
   end
 
+  it 'allows arbitrary hit increments' do
+    Boffin::Hit.new(@tracker, :tests, @ditty, :unique => [nil, @user], :increment => 5)
+    Boffin::Hit.new(@tracker, :tests, @ditty, :unique => [nil, @user], :increment => 5)
+    [:hours, :days, :months].each do |interval|
+      @tracker.top(:tests, interval => 1, :counts => true).
+        should == [['1', 10]]
+      @tracker.top(:tests, interval => 1, :counts => true, :unique => true).
+        should == [['1', 5]]
+    end
+  end
 end
