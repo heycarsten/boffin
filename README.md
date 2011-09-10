@@ -51,7 +51,7 @@ Most of Boffin's default configuration options are quite reasonable, but they
 are easy to change if required:
 
 ```ruby
-Boffin.configure do |c|
+Boffin.config do |c|
   c.redis              = MyApp.redis             # Redis.connect by default
   c.namespace          = "tracking:#{MyApp.env}" # Redis key namespace
   c.hours_window_secs  = 3.days     # Time to maintain hourly interval data
@@ -263,7 +263,7 @@ end
 post '/tweets' do
   @tweet = Tweet.create(params[:tweet])
   if @tweet.valid?
-    @tweet.words.each { WordsTracker.hit(:tweets, word) }
+    @tweet.words.each { |word| WordsTracker.hit(:tweets, word) }
     redirect to("/tweets/#{@tweet.id}")
   else
     haml :'tweets/form'
