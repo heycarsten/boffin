@@ -277,6 +277,41 @@ end
 ```
 _*This is a joke._
 
+
+Custom increments
+-----------------
+
+For some applications you might want to track something beyond simple hits.
+To accomodate this you can specify a custom increment to any hit you record.
+For example, if you run an ecommerce site it might be nice to know which
+products are your bestsellers:
+
+```ruby
+class Product < ActiveRecord::Base
+  Boffin.track(self, [:sales])
+end
+
+class Order < ActiveRecord::Base
+  after_create :track_sales
+
+  private
+  def track_sales
+    line_items.each do |line_item|
+      product = line_item.product
+      amount  = product.amount.cents * line_item.quantity
+
+      product.hit :sales, increment: amount
+    end
+  end
+end
+```
+
+Then, when you want to check on your sales over the last day:
+
+```ruby
+Product.top_ids(:sales, hours: 24, counts: true)
+```
+
 TODO
 ----
 
