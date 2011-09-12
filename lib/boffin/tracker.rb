@@ -25,14 +25,16 @@ module Boffin
 
     # @param [Symbol] hit_type
     # @param [#as_member, #id, #to_s] instance
-    # @param [Array] uniquenesses
+    # @param [Hash] options
+    # @option options [Array] :unique ([]) uniquenesses
+    # @option options [Fixnum] :increment (1) hit increment
     # @return [Hit]
     # @raise Boffin::UndefinedHitTypeError
     #   Raised if a list of hit types is available and the provided hit type is
     #   not in the list.
-    def hit(hit_type, instance, uniquenesses = [])
+    def hit(hit_type, instance, options={})
       validate_hit_type(hit_type)
-      Hit.new(self, hit_type, instance, uniquenesses)
+      Hit.new(self, hit_type, instance, options)
     end
 
     # @param [Symbol] hit_type

@@ -14,43 +14,43 @@ describe Boffin::Tracker do
 
     Timecop.freeze(@date - 2) do
       @tracker.hit(:views, @instance3)
-      @tracker.hit(:likes, @instance3, [@user1])
-      @tracker.hit(:views, @instance3, ['sess.1'])
-      @tracker.hit(:views, @instance3, ['sess.2'])
-      @tracker.hit(:views, @instance3, [@user2])
-      @tracker.hit(:likes, @instance1, [nil, nil])
-      @tracker.hit(:views, @instance3, ['sess.4'])
-      @tracker.hit(:views, @instance3, [@user1])
-      @tracker.hit(:views, @instance2, [@user2])
-      @tracker.hit(:views, @instance3, [@user2])
+      @tracker.hit(:likes, @instance3, :unique => [@user1])
+      @tracker.hit(:views, @instance3, :unique => ['sess.1'])
+      @tracker.hit(:views, @instance3, :unique => ['sess.2'])
+      @tracker.hit(:views, @instance3, :unique => [@user2])
+      @tracker.hit(:likes, @instance1, :unique => [nil, nil])
+      @tracker.hit(:views, @instance3, :unique => ['sess.4'])
+      @tracker.hit(:views, @instance3, :unique => [@user1])
+      @tracker.hit(:views, @instance2, :unique => [@user2])
+      @tracker.hit(:views, @instance3, :unique => [@user2])
       @tracker.hit(:likes, @instance3)
-      @tracker.hit(:views, @instance3, ['sess.1'])
+      @tracker.hit(:views, @instance3, :unique => ['sess.1'])
       @tracker.hit(:views, @instance3)
-      @tracker.hit(:likes, @instance3, [@user1])
-      @tracker.hit(:views, @instance3, ['sess.1'])
+      @tracker.hit(:likes, @instance3, :unique => [@user1])
+      @tracker.hit(:views, @instance3, :unique => ['sess.1'], :increment => 2)
     end
 
     Timecop.freeze(@date - 1) do
       @tracker.hit(:views, @instance1)
-      @tracker.hit(:likes, @instance2, [@user1])
-      @tracker.hit(:views, @instance2, ['sess.4'])
-      @tracker.hit(:views, @instance2, [nil, @user1])
-      @tracker.hit(:views, @instance2, ['sess.3'])
-      @tracker.hit(:views, @instance1, ['sess.3'])
-      @tracker.hit(:views, @instance1, [@user1])
-      @tracker.hit(:views, @instance2, ['sess.2'])
-      @tracker.hit(:views, @instance1, [@user1])
-      @tracker.hit(:views, @instance1, [@user2])
+      @tracker.hit(:likes, @instance2, :unique => [@user1])
+      @tracker.hit(:views, @instance2, :unique => ['sess.4'])
+      @tracker.hit(:views, @instance2, :unique => [nil, @user1])
+      @tracker.hit(:views, @instance2, :unique => ['sess.3'])
+      @tracker.hit(:views, @instance1, :unique => ['sess.3'])
+      @tracker.hit(:views, @instance1, :unique => [@user1])
+      @tracker.hit(:views, @instance2, :unique => ['sess.2'])
+      @tracker.hit(:views, @instance1, :unique => [@user1])
+      @tracker.hit(:views, @instance1, :unique => [@user2])
     end
 
-    @tracker.hit(:views, @instance3, ['sess.2'])
-    @tracker.hit(:views, @instance2, [@user2])
+    @tracker.hit(:views, @instance3, :unique => ['sess.2'])
+    @tracker.hit(:views, @instance2, :unique => [@user2])
     @tracker.hit(:likes, @instance2)
-    @tracker.hit(:views, @instance2, [@user1])
-    @tracker.hit(:views, @instance1, ['sess.4'])
-    @tracker.hit(:views, @instance3, ['sess.3'])
-    @tracker.hit(:views, @instance1, [@user1])
-    @tracker.hit(:views, @instance1, [@user2])
+    @tracker.hit(:views, @instance2, :unique => [@user1])
+    @tracker.hit(:views, @instance1, :unique => ['sess.4'])
+    @tracker.hit(:views, @instance3, :unique => ['sess.3'])
+    @tracker.hit(:views, @instance1, :unique => [@user1])
+    @tracker.hit(:views, @instance1, :unique => [@user2])
   end
 
   describe '#hit' do
@@ -134,7 +134,7 @@ describe Boffin::Tracker do
     it 'returns ids and counts when passed { counts: true } as an option' do
       ids = @tracker.top(:views, :days => 3, :counts => true)
       ids.should == [
-        ['300', 12],
+        ['300', 13],
         ['100', 8],
         ['200', 7]
       ]

@@ -51,7 +51,7 @@ Most of Boffin's default configuration options are quite reasonable, but they
 are easy to change if required:
 
 ```ruby
-Boffin.configure do |c|
+Boffin.config do |c|
   c.redis              = MyApp.redis             # Redis.connect by default
   c.namespace          = "tracking:#{MyApp.env}" # Redis key namespace
   c.hours_window_secs  = 3.days     # Time to maintain hourly interval data
@@ -128,7 +128,7 @@ identify hits from particular users or sessions:
 ```ruby
 get '/listings/:id' do
   @listing = Listing[params[:id]]
-  @listing.hit(:views, [current_user, session[:id]])
+  @listing.hit(:views, unique: [current_user, session[:id]])
   haml :'listings/show'
 end
 ```
@@ -144,7 +144,7 @@ we want to hit an instance, so let's create a helper:
 ```ruby
 helpers do
   def hit(trackable, type)
-    trackable.hit(type, [current_user, session[:id]])
+    trackable.hit(type, unique: [current_user, session[:id]])
   end
 end
 ```
@@ -156,7 +156,7 @@ applicable to a Rails application as well:
 class ApplicationController < ActionController::Base
   protected
   def hit(trackable, type)
-    trackable.hit(type, [current_user, session[:session_id]])
+    trackable.hit(type, unique: [current_user, session[:session_id]])
   end
 end
 ```
@@ -263,7 +263,7 @@ end
 post '/tweets' do
   @tweet = Tweet.create(params[:tweet])
   if @tweet.valid?
-    @tweet.words.each { WordsTracker.hit(:tweets, word) }
+    @tweet.words.each { |word| WordsTracker.hit(:tweets, word) }
     redirect to("/tweets/#{@tweet.id}")
   else
     haml :'tweets/form'
@@ -276,6 +276,41 @@ get '/trends' do
 end
 ```
 _*This is a joke._
+
+
+Custom increments
+-----------------
+
+For some applications you might want to track something beyond simple hits.
+To accomodate this you can specify a custom increment to any hit you record.
+For example, if you run an ecommerce site it might be nice to know which
+products are your bestsellers:
+
+```ruby
+class Product < ActiveRecord::Base
+  Boffin.track(self, [:sales])
+end
+
+class Order < ActiveRecord::Base
+  after_create :track_sales
+
+  private
+  def track_sales
+    line_items.each do |line_item|
+      product = line_item.product
+      amount  = product.amount.cents * line_item.quantity
+
+      product.hit :sales, increment: amount
+    end
+  end
+end
+```
+
+Then, when you want to check on your sales over the last day:
+
+```ruby
+Product.top_ids(:sales, hours: 24, counts: true)
+```
 
 TODO
 ----
