@@ -54,7 +54,11 @@ module Boffin
       # NOTE: this feels like a hack. I'm sure there is a more elegant way
       # to determine whether the :id method is the built in Object#id but
       # I can't think of it
-      obj.respond_to?(:id) and obj.id != obj.object_id
+      if RUBY_VERSION < "1.9"
+        obj.respond_to?(:id) and obj.id != obj.object_id
+      else
+        obj.respond_to?(:id)
+      end
     end
 
     # Pulls time interval information from a hash of options.
