@@ -40,8 +40,8 @@ module Boffin
 
     # @see Tracker#hit
     # @return [Hit]
-    def hit(type, options={})
-      self.class.boffin.hit(type, self, options)
+    def hit(type, opts = {})
+      self.class.boffin.hit(type, self, opts)
     end
 
     # @see Tracker#hit_count

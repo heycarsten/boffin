@@ -16,16 +16,16 @@ module Boffin
     # @option options [Array] :unique ([]) An array of which the first
     #   object is used to generate a session identifier for hit uniqueness
     # @option options [Fixnum] :increment (1) The hit increment
-    def initialize(tracker, type, instance, options={})
-      if options.is_a? Array
+    def initialize(tracker, type, instance, opts = {})
+      if opts.is_a?(Array)
         warn "This constructor is deprecated and will soon be unavailable\n" \
              "please create Hits with: \n" \
              "Hit.new(@tracker, :type, @instance, :unique => [1,2,3,4])\n"
-        uniquenesses = options
+        uniquenesses = opts
         @increment   = 1
       else
-        uniquenesses = options.delete(:unique) || []
-        @increment   = options.delete(:increment) || 1
+        uniquenesses = opts.delete(:unique) || []
+        @increment   = opts.delete(:increment) || 1
       end
       @now      = Time.now
       @sessid   = Utils.uniquenesses_as_session_identifier(uniquenesses)

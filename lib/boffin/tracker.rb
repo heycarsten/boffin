@@ -32,9 +32,9 @@ module Boffin
     # @raise Boffin::UndefinedHitTypeError
     #   Raised if a list of hit types is available and the provided hit type is
     #   not in the list.
-    def hit(hit_type, instance, options={})
+    def hit(hit_type, instance, opts = {})
       validate_hit_type(hit_type)
-      Hit.new(self, hit_type, instance, options)
+      Hit.new(self, hit_type, instance, opts)
     end
 
     # @param [Symbol] hit_type
