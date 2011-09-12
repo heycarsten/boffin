@@ -238,14 +238,14 @@ track your friends' favourite and least favourite colours:
 ```ruby
 @tracker = Boffin::Tracker.new(:colours, [:faves, :unfaves])
 
-@tracker.hit(:faves,   'red',    ['lena'])
-@tracker.hit(:unfaves, 'blue',   ['lena'])
-@tracker.hit(:faves,   'green',  ['soren'])
-@tracker.hit(:unfaves, 'red',    ['soren'])
-@tracker.hit(:faves,   'green',  ['jens'])
-@tracker.hit(:unfaves, 'yellow', ['jens'])
+@tracker.hit(:faves,   'red',    unique: ['lena'])
+@tracker.hit(:unfaves, 'blue',   unique: ['lena'])
+@tracker.hit(:faves,   'green',  unique: ['soren'])
+@tracker.hit(:unfaves, 'red',    unique: ['soren'])
+@tracker.hit(:faves,   'green',  unique: ['jens'])
+@tracker.hit(:unfaves, 'yellow', unique: ['jens'])
 
-@tracker.top(:faves, months: 1)
+@tracker.top(:faves, days: 1)
 ```
 
 Or, perhaps you'd like to clone Twitter? Using Boffin, all the work is
@@ -295,11 +295,11 @@ class Order < ActiveRecord::Base
   after_create :track_sales
 
   private
+
   def track_sales
     line_items.each do |line_item|
       product = line_item.product
       amount  = product.amount.cents * line_item.quantity
-
       product.hit :sales, increment: amount
     end
   end
@@ -312,18 +312,17 @@ Then, when you want to check on your sales over the last day:
 Product.top_ids(:sales, hours: 24, counts: true)
 ```
 
-TODO
-----
+The Future&trade;
+-----------------
 
  * Ability to hit multiple instances in one command
  * Ability to get hit-count range for an instance
  * Some nice examples with pretty things
- * ORM adapters for niceness and tighter integration
+ * Maybe ORM adapters for niceness and tighter integration
  * Examples of how to turn IDs back into instances
  * Reporting DSL thingy
- * Web framework integration (helpers for tracking hits)
- * Ability to blend unique hits with raw hits
- * Ability to unhit an instance (if a model instance is destroyed for example)
+ * Web framework integration (helpers for tracking hits, console type ditty.)
+ * Ability to union on unique hits and raw hits
 
 FAQ
 ---
