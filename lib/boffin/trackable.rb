@@ -45,9 +45,9 @@ module Boffin
     end
 
     # @see Tracker#hit_count
-    # @return [Fixnum]
     def hit_count(type)
       self.class.boffin.hit_count(type, self)
+    # @return [Float]
     end
 
     # @see Tracker#uhit_count
@@ -57,7 +57,7 @@ module Boffin
     end
 
     # @see Tracker#hit_count_for_session_id
-    # @return [Fixnum]
+    # @return [Float]
     def hit_count_for_session_id(type, sess_obj)
       self.class.boffin.hit_count_for_session_id(type, self, sess_obj)
     end

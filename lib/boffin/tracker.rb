@@ -25,9 +25,9 @@ module Boffin
 
     # @param [Symbol] hit_type
     # @param [#as_member, #id, #to_s] instance
-    # @param [Hash] options
-    # @option options [Array] :unique ([]) uniquenesses
-    # @option options [Fixnum] :increment (1) hit increment
+    # @param [Hash] opts
+    # @option opts [Array] :unique ([]) uniquenesses
+    # @option opts [Fixnum] :increment (1) hit increment
     # @return [Hit]
     # @raise Boffin::UndefinedHitTypeError
     #   Raised if a list of hit types is available and the provided hit type is
@@ -39,6 +39,9 @@ module Boffin
 
     # @param [Symbol] hit_type
     # @param [#as_member, #id, #to_s] instance
+    # @param [Hash] opts
+    # @option opts [Boolean] :unique (false)
+    #   If `true` will return a count of unique hits.
     # @return [Float]
     # @raise Boffin::UndefinedHitTypeError
     #   Raised if a list of hit types is available and the provided hit type is
@@ -172,7 +175,6 @@ module Boffin
     # @param [Keyspace] ks
     #   Keyspace to perform the union on
     # @param [Hash] weights
-    # @param [Symbol] hit_type
     # @param [:hours, :days, :months] unit
     # @param [Fixnum] size
     #   Number of intervals to include in the union

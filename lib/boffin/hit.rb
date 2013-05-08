@@ -12,10 +12,10 @@ module Boffin
     # @param [Object] instance
     #   The instance that is being hit, any object that responds to
     #   `#to_member`, `#id`, or `#to_s`
-    # @param [Hash] options
-    # @option options [Array] :unique ([]) An array of which the first
+    # @param [Hash] opts
+    # @option opts [Array] :unique ([]) An array of which the first
     #   object is used to generate a session identifier for hit uniqueness
-    # @option options [Fixnum] :increment (1) The hit increment
+    # @option opts [Fixnum] :increment (1) The hit increment
     def initialize(tracker, type, instance, opts = {})
       uniquenesses = opts.delete(:unique) || []
       @increment   = opts.delete(:increment) || 1
