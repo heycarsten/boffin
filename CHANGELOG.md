@@ -1,3 +1,10 @@
+**1.0.0**
+
+ * Support for redis-rb 3.0, no backwards compatibility is maintained.
+ * Officially support Ruby 2.0, 1.9.3, and 1.8.7.
+ * Depricated `Tracker#uhit_count` in favour of `Tracker#count(..., unique: true)`
+ 
+
 **0.3.0**
 
  * `Hit` can now accept a custom increment, this allows values such as cents to
