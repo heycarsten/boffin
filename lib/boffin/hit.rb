@@ -17,22 +17,14 @@ module Boffin
     #   object is used to generate a session identifier for hit uniqueness
     # @option options [Fixnum] :increment (1) The hit increment
     def initialize(tracker, type, instance, opts = {})
-      if opts.is_a?(Array)
-        warn "This constructor is deprecated and will soon be unavailable\n" \
-             "please create Hits with: \n" \
-             "Hit.new(@tracker, :type, @instance, :unique => [1,2,3,4])\n"
-        uniquenesses = opts
-        @increment   = 1
-      else
-        uniquenesses = opts.delete(:unique) || []
-        @increment   = opts.delete(:increment) || 1
-      end
-      @now      = Time.now
-      @sessid   = Utils.uniquenesses_as_session_identifier(uniquenesses)
-      @type     = type
-      @tracker  = tracker
-      @instance = instance
-      @member   = Utils.object_as_member(@instance)
+      uniquenesses = opts.delete(:unique) || []
+      @increment   = opts.delete(:increment) || 1
+      @now         = Time.now
+      @sessid      = Utils.uniquenesses_as_session_identifier(uniquenesses)
+      @type        = type
+      @tracker     = tracker
+      @instance    = instance
+      @member      = Utils.object_as_member(@instance)
       store
       freeze
     end
