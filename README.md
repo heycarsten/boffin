@@ -127,7 +127,7 @@ end
 
 Boffin now adds uniqueness to the hit in the form of `current_user.id` if
 available. If `current_user` is nil, Boffin then uses `session[:id]`. You can
-provide as many uniquenesses as you'd like, the first one that is not blank
+provide as many unique factors as you'd like, the first one that is not blank
 (`nil`, `false`, `[]`, `{}`, or `''`) will be used.
 
 It could get a bit tedious having to add `[current_user, session[:id]]` whenever
