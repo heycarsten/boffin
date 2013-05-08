@@ -118,7 +118,7 @@ Now to track hits on instances of the Listing model, simply:
 get '/listings/:id' do
   @listing = Listing[params[:id]]
   @listing.hit(:views)
-  haml :'listings/show'
+  erb :'listings/show'
 end
 ```
 
@@ -129,7 +129,7 @@ identify hits from particular users or sessions:
 get '/listings/:id' do
   @listing = Listing[params[:id]]
   @listing.hit(:views, unique: [current_user, session[:id]])
-  haml :'listings/show'
+  erb :'listings/show'
 end
 ```
 
@@ -167,7 +167,7 @@ You get the idea, now storing a hit is as easy as:
 get '/listings/:id' do
   @listing = Listing[params[:id]]
   hit @listing, :views
-  haml :'listings/show'
+  erb :'listings/show'
 end
 ```
 
@@ -182,10 +182,16 @@ After some hits have been tracked, you can start to do some queries:
 @listing.hit_count(:views)
 ```
 
-**Get count of unique views for an instance**
+**Get count of all unique views for an instance**
 
 ```ruby
 @listing.hit_count(:views, unique: true)
+```
+
+**Get count of unique views for a specific user**
+
+```ruby
+@listing.hit_count(:views, unique: current_user)
 ```
 
 **Get IDs of the most viewed listings in the past 5 days**
@@ -197,7 +203,7 @@ Listing.top_ids(:views, days: 5)
 **Get IDs of the least viewed listings (that were viewed) in the past 8 hours**
 
 ```ruby
-Listing.top_ids(:views, hours: 8, order: 'asc')
+Listing.top_ids(:views, hours: 8, order: :asc)
 ```
 
 **Get IDs and hit counts of the most liked listings in the past 5 days**
@@ -238,12 +244,12 @@ track your friends' favourite and least favourite colours:
 ```ruby
 @tracker = Boffin::Tracker.new(:colours, [:faves, :unfaves])
 
-@tracker.hit(:faves,   'red',    unique: ['lena'])
-@tracker.hit(:unfaves, 'blue',   unique: ['lena'])
-@tracker.hit(:faves,   'green',  unique: ['soren'])
-@tracker.hit(:unfaves, 'red',    unique: ['soren'])
-@tracker.hit(:faves,   'green',  unique: ['jens'])
-@tracker.hit(:unfaves, 'yellow', unique: ['jens'])
+@tracker.hit(:faves,   'red',    unique: 'lena')
+@tracker.hit(:unfaves, 'blue',   unique: 'lena')
+@tracker.hit(:faves,   'green',  unique: 'soren')
+@tracker.hit(:unfaves, 'red',    unique: 'soren')
+@tracker.hit(:faves,   'green',  unique: 'jens')
+@tracker.hit(:unfaves, 'yellow', unique: 'jens')
 
 @tracker.top(:faves, days: 1)
 ```
@@ -257,7 +263,7 @@ WordsTracker = Boffin::Tracker.new(:words, [:searches, :tweets])
 get '/search' do
   @tweets = Tweet.search(params[:q])
   params[:q].split.each { |word| WordsTracker.hit(:searches, word) }
-  haml :'search/show'
+  erb :'search/show'
 end
 
 post '/tweets' do
@@ -266,13 +272,13 @@ post '/tweets' do
     @tweet.words.each { |word| WordsTracker.hit(:tweets, word) }
     redirect to("/tweets/#{@tweet.id}")
   else
-    haml :'tweets/form'
+    erb :'tweets/form'
   end
 end
 
 get '/trends' do
   @words = WordsTracker.top({ tweets: 3, searches: 1 }, hours: 5)
-  haml :'trends/index'
+  erb :'trends/index'
 end
 ```
 _*This is a joke._
@@ -326,6 +332,12 @@ The Future&trade;
 
 FAQ
 ---
+
+### OMG haven't you heard of page caching?! How am I supposed to use this if my Ruby app doesn't get hit?
+
+Make an XHR request to an endpoint which is soley responsible for tracking hits
+to stuff whenever a specific thing loads. My above examples are just to
+demonstrate how to use the APIs, you can use them wherever you want.
 
 ### What's with the name?
 
