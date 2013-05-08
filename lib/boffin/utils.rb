@@ -114,16 +114,16 @@ module Boffin
       times
     end
 
-    # Generates a set member based off the first object in the provided array
-    # that is not `nil`. If the array is empty or only contains `nil` elements
-    # then {Boffin::NIL_SESSION_MEMBER} is returned.
+    # Generates a unique set member based off the first object in the provided
+    # array that is not `nil`. If the array is empty or only contains `nil`
+    # element then {Boffin::NIL_SESSION_MEMBER} is returned.
     # @param [Array] aspects
     #   An array of which the first non-nil element is passed to
-    #   {#object_as_session_identifier}
+    #   {#object_as_uid}
     # @return [String]
-    def uniquenesses_as_session_identifier(aspects)
+    def uniquenesses_as_uid(*aspects)
       if (obj = aspects.flatten.reject { |u| blank?(u) }.first)
-        object_as_session_identifier(obj)
+        object_as_uid(obj)
       else
         NIL_SESSION_MEMBER
       end
@@ -172,7 +172,7 @@ module Boffin
     # @param [#as_member, #id, #to_s] obj
     # @return [String] A string that can be used as a member in {Keyspace#hits}.
     # @see #object_as_identifier
-    def object_as_session_identifier(obj)
+    def object_as_uid(obj)
       object_as_identifier(obj, :namespace => true)
     end
 

@@ -20,7 +20,7 @@ module Boffin
       uniquenesses = opts.delete(:unique) || []
       @increment   = opts.delete(:increment) || 1
       @now         = Time.now
-      @sessid      = Utils.uniquenesses_as_session_identifier(uniquenesses)
+      @sessid      = Utils.uniquenesses_as_uid(uniquenesses)
       @type        = type
       @tracker     = tracker
       @instance    = instance

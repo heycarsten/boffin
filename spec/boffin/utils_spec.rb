@@ -99,29 +99,29 @@ describe Boffin::Utils do
     end
   end
 
-  describe '::uniquenesses_as_session_identifier' do
+  describe '::uniquenesses_as_uid' do
     specify do
-      subject.uniquenesses_as_session_identifier([]).
+      subject.uniquenesses_as_uid([]).
         should == Boffin::NIL_SESSION_MEMBER
     end
 
     specify do
-      subject.uniquenesses_as_session_identifier([nil, 'hi']).
+      subject.uniquenesses_as_uid([nil, 'hi']).
         should == 'hi'
     end
 
     specify do
-      subject.uniquenesses_as_session_identifier([MockDitty.new]).
+      subject.uniquenesses_as_uid([MockDitty.new]).
         should == 'mock_ditty:1'
     end
   end
 
-  describe '::object_as_session_identifier' do
-    specify { subject.object_as_session_identifier(nil).should == '' }
-    specify { subject.object_as_session_identifier(3.14).should == '3.14' }
+  describe '::object_as_uid' do
+    specify { subject.object_as_uid(nil).should == '' }
+    specify { subject.object_as_uid(3.14).should == '3.14' }
 
     specify do
-      subject.object_as_session_identifier(MockDitty.new).
+      subject.object_as_uid(MockDitty.new).
         should == 'mock_ditty:1'
     end
   end
