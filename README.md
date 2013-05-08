@@ -36,14 +36,6 @@ probably that of a Rails or Sinatra application. Just add `boffin` to your
 gem 'boffin'
 ```
 
-For utmost performance on *nix-based systems, require
-[hiredis](https://github.com/pietern/hiredis-rb) before you require Boffin:
-
-```ruby
-gem 'hiredis'
-gem 'boffin'
-```
-
 Configuration
 -------------
 
