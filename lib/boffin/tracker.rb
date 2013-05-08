@@ -232,6 +232,8 @@ module Boffin
         redis.zrange(*args)
       when :desc
         redis.zrevrange(*args)
+      else
+        raise ArgumentError, "unknown order type: #{opts[:order].inspect}"
       end
     end
   end

@@ -55,14 +55,14 @@ describe Boffin::Tracker do
 
   describe '#hit' do
     it 'throws an error if the hit type is not in the list' do
-      lambda  { @tracker.hit(:view, @instance1) }.
+      lambda { @tracker.hit(:view, @instance1) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
   end
 
   describe '#hit_count' do
     it 'throws an error if the hit type is not in the list' do
-      lambda  { @tracker.hit_count(:view, @instance1) }.
+      lambda { @tracker.hit_count(:view, @instance1) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
@@ -85,7 +85,7 @@ describe Boffin::Tracker do
 
   describe '#hit_count_for_session_id' do
     it 'throws an error if the hit type is not in the list' do
-      lambda  { @tracker.hit_count_for_session_id(:view, @instance1, 'sess.1') }.
+      lambda { @tracker.hit_count_for_session_id(:view, @instance1, 'sess.1') }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
@@ -100,12 +100,12 @@ describe Boffin::Tracker do
 
   describe '#top' do
     it 'throws an error if passed hit type is invalid' do
-      lambda  { @tracker.top(:view, :days => 3) }.
+      lambda { @tracker.top(:view, :days => 3) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
     it 'throws an error if passed weights with hit type that is invalid' do
-      lambda  { @tracker.top({ :view => 1 }, :days => 3) }.
+      lambda { @tracker.top({ :view => 1 }, :days => 3) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
@@ -122,6 +122,11 @@ describe Boffin::Tracker do
     it 'returns ids in ascending order when passed { order: "asc" } as an option' do
       ids = @tracker.top(:views, :days => 3, :order => 'asc')
       ids.should == ['200', '100', '300']
+    end
+
+    it 'throws an error if the specified order is not valid' do
+      lambda { @tracker.top(:views, :days => 3, :order => 'desk') }.
+        should raise_error ArgumentError
     end
 
     it 'returns ids and counts when passed { counts: true } as an option' do
