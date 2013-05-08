@@ -39,13 +39,14 @@ module Boffin
 
     # @param [Symbol] hit_type
     # @param [#as_member, #id, #to_s] instance
-    # @return [Fixnum]
+    # @return [Float]
     # @raise Boffin::UndefinedHitTypeError
     #   Raised if a list of hit types is available and the provided hit type is
     #   not in the list.
     def hit_count(hit_type, instance)
       validate_hit_type(hit_type)
-      redis.get(keyspace.hit_count(hit_type, instance)).to_i
+      count = redis.get(keyspace.hit_count(hit_type, instance))
+      (count && count.to_f) || 0.0
     end
 
     # @param [Symbol] hit_type
@@ -56,7 +57,8 @@ module Boffin
     #   not in the list.
     def uhit_count(hit_type, instance)
       validate_hit_type(hit_type)
-      redis.zcard(keyspace.hits(hit_type, instance)).to_i
+      count = redis.zcard(keyspace.hits(hit_type, instance))
+      (count && count.to_i) || 0
     end
 
     # @param [Symbol] hit_type
@@ -69,14 +71,15 @@ module Boffin
     def hit_count_for_session_id(hit_type, instance, sess_obj)
       validate_hit_type(hit_type)
       sessid = Utils.object_as_session_identifier(sess_obj)
-      redis.zscore(keyspace.hits(hit_type, instance), sessid).to_i
+      keys   = keyspace.hits(hit_type, instance)
+      redis.zscore(keys, sessid) || 0.0
     end
 
     # Performs set union across the specified number of hours, days, or months
     # to calculate the members with the highest hit counts. The operation can
     # be performed on one hit type, or multiple hit types with weights.
     # @param [Symbol, Hash] type_or_weights
-    #   When Hash the set union is calculated 
+    #   When Hash the set union is calculated
     # @param [Hash] opts
     # @option opts [true, false] :unique (false)
     #   If `true` then only unique hits are considered in the calculation
@@ -200,7 +203,7 @@ module Boffin
       zrangeopts = {
         :counts => opts.delete(:counts),
         :order  => (opts.delete(:order) || :desc).to_sym }
-      if redis.zcard(storkey) == 0
+      if redis.zcard(storkey) < 1
         redis.zunionstore(storkey, keys, opts)
         redis.expire(storkey, @config.cache_expire_secs)
       end
@@ -217,17 +220,14 @@ module Boffin
     #   option is `true` it returns an array of pairs where the first value is
     #   the member, and the second value is the member's score.
     def zrange(key, opts)
-      args = [key, 0, -1, opts[:counts] ? { :withscores => true } : {}]
-      result = case opts[:order]
-        when :asc  then redis.zrange(*args)
-        when :desc then redis.zrevrange(*args)
-      end
-      if opts[:counts]
-        result.each_slice(2).map { |mbr, score| [mbr, score.to_i] }
-      else
-        result
+      args = [key, 0, -1]
+      args << { :with_scores => true } if opts[:counts]
+      case opts[:order]
+      when :asc
+        redis.zrange(*args)
+      when :desc
+        redis.zrevrange(*args)
       end
     end
-
   end
 end

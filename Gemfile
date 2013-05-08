@@ -1,8 +1,6 @@
-source :rubygems
+source 'https://rubygems.org'
 gemspec
 
 group :development do
-  gem 'rake'
   gem 'redcarpet'
-  gem 'yard', :git => 'https://github.com/lsegal/yard.git'
 end

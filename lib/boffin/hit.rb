@@ -57,11 +57,11 @@ module Boffin
     #   `true` if this hit is unique, `false` if it has been made before by the
     #   same session identifer.
     def track_hit
-      redis.incrby(keyspace.hit_count(@type, @instance), @increment)
-      redis.zincrby(keyspace.hits(@type, @instance), 1, @sessid) == '1'
+      redis.incrbyfloat(keyspace.hit_count(@type, @instance), @increment)
+      redis.zincrby(keyspace.hits(@type, @instance), 1, @sessid) == 1.0
     end
 
-    # Store the hit member across all time interval for the current window
+    # Store the hit member across all time intervals for the current window
     # @param [true, false] uniq
     #   If `true` the hit is also added to the keys scoped for unique hits
     def set_windows(uniq)
