@@ -28,8 +28,8 @@ describe Boffin::Trackable do
     @mock.hit_count(:views).should == 2
   end
 
-  it 'delegates #uhit_count to the Tracker instance' do
-    @mock.uhit_count(:views).should == 1
+  it 'delegates #hit_count { unique: true } to the Tracker instance' do
+    @mock.hit_count(:views, :unique => true).should == 1
   end
 
   it 'delegates #hit_count_for_session_id to the Tracker instance' do

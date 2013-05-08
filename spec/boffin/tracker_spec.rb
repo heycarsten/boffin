@@ -73,20 +73,13 @@ describe Boffin::Tracker do
     it 'returns 0 for an instance that was never hit' do
       @tracker.hit_count(:views, 'neverhit').should == 0
     end
-  end
-
-  describe '#uhit_count' do
-    it 'throws an error if the hit type is not in the list' do
-      lambda  { @tracker.uhit_count(:view, @instance1) }.
-        should raise_error Boffin::UndefinedHitTypeError
-    end
 
     it 'returns the unique hit count for the instance' do
-      @tracker.uhit_count(:views, @instance1).should == 5
+      @tracker.hit_count(:views, @instance1, :unique => true).should == 5
     end
 
     it 'returns 0 for an instance that was never hit' do
-      @tracker.hit_count(:likes, @instance4).should == 0
+      @tracker.hit_count(:likes, @instance4, :unique => true).should == 0
     end
   end
 

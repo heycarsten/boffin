@@ -46,9 +46,13 @@ module Boffin
     # @raise Boffin::UndefinedHitTypeError
     #   Raised if a list of hit types is available and the provided hit type is
     #   not in the list.
-    def hit_count(hit_type, instance)
+    def hit_count(hit_type, instance, opts = {})
       validate_hit_type(hit_type)
-      count = redis.get(keyspace.hit_count(hit_type, instance))
+      count = if opts[:unique]
+        redis.zcard(keyspace.hits(hit_type, instance))
+      else
+        redis.get(keyspace.hit_count(hit_type, instance))
+      end
       (count && count.to_f) || 0.0
     end
 
@@ -59,9 +63,8 @@ module Boffin
     #   Raised if a list of hit types is available and the provided hit type is
     #   not in the list.
     def uhit_count(hit_type, instance)
-      validate_hit_type(hit_type)
-      count = redis.zcard(keyspace.hits(hit_type, instance))
-      (count && count.to_i) || 0
+      warn "uhit_count is depricated, use hit_count(unique: true) instead"
+      hit_count(hit_type, instance, :unique => true)
     end
 
     # @param [Symbol] hit_type

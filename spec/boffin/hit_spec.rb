@@ -22,7 +22,7 @@ describe Boffin::Hit, '::new' do
         should == [['1', 1]]
     end
     @tracker.hit_count(:tests, @ditty).should == 1
-    @tracker.uhit_count(:tests, @ditty).should == 1
+    @tracker.hit_count(:tests, @ditty, :unique => true).should == 1
   end
 
   it 'does not store data under unique keys if the hit is not unique' do
@@ -36,7 +36,7 @@ describe Boffin::Hit, '::new' do
     end
     @tracker.hit_count_for_session_id(:tests, @ditty, @user).should == 2
     @tracker.hit_count(:tests, @ditty).should == 2
-    @tracker.uhit_count(:tests, @ditty).should == 1
+    @tracker.hit_count(:tests, @ditty, :unique => true).should == 1
   end
 
   it 'allows arbitrary hit increments' do

@@ -185,7 +185,7 @@ After some hits have been tracked, you can start to do some queries:
 **Get count of unique views for an instance**
 
 ```ruby
-@listing.uhit_count(:views)
+@listing.hit_count(:views, unique: true)
 ```
 
 **Get IDs of the most viewed listings in the past 5 days**
