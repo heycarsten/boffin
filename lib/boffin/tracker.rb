@@ -38,47 +38,30 @@ module Boffin
     end
 
     # @param [Symbol] hit_type
+    #   Type of hit.
     # @param [#as_member, #id, #to_s] instance
+    #   Object to track.
     # @param [Hash] opts
-    # @option opts [Boolean] :unique (false)
-    #   If `true` will return a count of unique hits.
+    # @option opts [true, #as_member, #id, #to_s] :unique (false)
+    #   If `true` will return a count of unique hits. If passed an object, will
+    #   use that object as a unique identifier and return the score associated
+    #   with it.
     # @return [Float]
     # @raise Boffin::UndefinedHitTypeError
     #   Raised if a list of hit types is available and the provided hit type is
     #   not in the list.
-    def hit_count(hit_type, instance, opts = {})
+    def count(hit_type, instance, opts = {})
       validate_hit_type(hit_type)
-      count = if opts[:unique]
+      count = case
+      when opts[:unique] == true
         redis.zcard(keyspace.hits(hit_type, instance))
+      when opts[:unique]
+        uid = Utils.object_as_uid(opts[:unique])
+        redis.zscore(keyspace.hits(hit_type, instance), uid)
       else
         redis.get(keyspace.hit_count(hit_type, instance))
       end
       (count && count.to_f) || 0.0
-    end
-
-    # @param [Symbol] hit_type
-    # @param [#as_member, #id, #to_s] instance
-    # @return [Fixnum]
-    # @raise Boffin::UndefinedHitTypeError
-    #   Raised if a list of hit types is available and the provided hit type is
-    #   not in the list.
-    def uhit_count(hit_type, instance)
-      warn "uhit_count is depricated, use hit_count(unique: true) instead"
-      hit_count(hit_type, instance, :unique => true)
-    end
-
-    # @param [Symbol] hit_type
-    # @param [#as_member, #id, #to_s] instance
-    # @param [#as_member, #id, #to_s] sess_obj
-    # @return [Fixnum]
-    # @raise Boffin::UndefinedHitTypeError
-    #   Raised if a list of hit types is available and the provided hit type is
-    #   not in the list.
-    def hit_count_for_session_id(hit_type, instance, sess_obj)
-      validate_hit_type(hit_type)
-      sessid = Utils.object_as_session_identifier(sess_obj)
-      keys   = keyspace.hits(hit_type, instance)
-      redis.zscore(keys, sessid) || 0.0
     end
 
     # Performs set union across the specified number of hours, days, or months

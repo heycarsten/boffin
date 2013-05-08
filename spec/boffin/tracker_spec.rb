@@ -62,39 +62,39 @@ describe Boffin::Tracker do
 
   describe '#hit_count' do
     it 'throws an error if the hit type is not in the list' do
-      lambda { @tracker.hit_count(:view, @instance1) }.
+      lambda { @tracker.count(:view, @instance1) }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
     it 'returns the raw hit count for the instance' do
-      @tracker.hit_count(:views, @instance1).should == 8
+      @tracker.count(:views, @instance1).should == 8
     end
 
     it 'returns 0 for an instance that was never hit' do
-      @tracker.hit_count(:views, 'neverhit').should == 0
+      @tracker.count(:views, 'neverhit').should == 0
     end
 
     it 'returns the unique hit count for the instance' do
-      @tracker.hit_count(:views, @instance1, :unique => true).should == 5
+      @tracker.count(:views, @instance1, :unique => true).should == 5
     end
 
     it 'returns 0 for an instance that was never hit' do
-      @tracker.hit_count(:likes, @instance4, :unique => true).should == 0
+      @tracker.count(:likes, @instance4, :unique => true).should == 0
     end
   end
 
   describe '#hit_count_for_session_id' do
     it 'throws an error if the hit type is not in the list' do
-      lambda { @tracker.hit_count_for_session_id(:view, @instance1, 'sess.1') }.
+      lambda { @tracker.count(:view, @instance1, :unique => 'sess.1') }.
         should raise_error Boffin::UndefinedHitTypeError
     end
 
     it 'returns the number of times the instance was hit by the session id' do
-      @tracker.hit_count_for_session_id(:views, @instance3, 'sess.1').should == 3
+      @tracker.count(:views, @instance3, :unique => 'sess.1').should == 3
     end
 
     it 'returns a count of 0 if the session id never hit the instance' do
-      @tracker.hit_count_for_session_id(:views, @instance1, 'nohit').should == 0
+      @tracker.count(:views, @instance1, :unique => 'nohit').should == 0
     end
   end
 

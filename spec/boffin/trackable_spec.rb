@@ -4,8 +4,8 @@ describe Boffin::Trackable do
   before :all do
     SpecHelper.flush_keyspace!
     @mock = MockTrackableInjected.new(1)
-    @mock.hit(:views, :unique => ['sess.1'])
-    @mock.hit(:views, :unique => ['sess.1'])
+    @mock.hit(:views, :unique => 'sess.1')
+    @mock.hit(:views, :unique => 'sess.1')
   end
 
   it 'can be included' do
@@ -32,7 +32,7 @@ describe Boffin::Trackable do
     @mock.hit_count(:views, :unique => true).should == 1
   end
 
-  it 'delegates #hit_count_for_session_id to the Tracker instance' do
-    @mock.hit_count_for_session_id(:views, 'sess.1').should == 2
+  it 'delegates #hit_count { unique: obj } to the Tracker instance' do
+    @mock.hit_count(:views, :unique => 'sess.1').should == 2
   end
 end

@@ -47,18 +47,7 @@ module Boffin
     # @see Tracker#hit_count
     # @return [Float]
     def hit_count(type, opts = {})
-      self.class.boffin.hit_count(type, self, opts)
-    end
-
-    def uhit_count(type)
-      warn "uhit_count has been depricated, use hit_count(unique: true) instead"
-      self.class.boffin.hit_count(type, self, :unique => true)
-    end
-
-    # @see Tracker#hit_count_for_session_id
-    # @return [Float]
-    def hit_count_for_session_id(type, sess_obj)
-      self.class.boffin.hit_count_for_session_id(type, self, sess_obj)
+      self.class.boffin.count(type, self, opts)
     end
 
   end
